@@ -17,6 +17,8 @@ FanIn
 	- Automatically merges the incoming contexts into a new context, if more than 1 value then they get turned into array
 	- Show the input for each arriving task and single merged output context
 
+Any Node that fails should record the error and kill all the others nodes for that workflow
+
 Model Call
 	- Specify model from registry
 	- Specify instructions
