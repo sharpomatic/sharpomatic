@@ -41,35 +41,30 @@ public class EngineService(IRepository Repository,
         if (currentNodes.Count != 1)
             throw new SharpOMaticException("Must have exactly one start node.");
 
-        context.Add("WorkflowId", workflowId);
-        context.Add("RunId", run.RunId);
-
-        var runContext = new RunContext(Repository, Notifications, JsonConverters, workflow, run.RunId, context);
+        var runContext = new RunContext(Repository, Notifications, JsonConverters, workflow, run.RunId);
 
         run.RunStatus = RunStatus.Running;
         run.Message = "Running";
         run.Started = DateTime.Now;
-        run.InputContext = runContext.TypedSerialization(runContext.NodeContext);
+        run.InputContext = runContext.TypedSerialization(context);
         await RunUpdated(run);
 
-        Queue.Enqueue(currentNodes[0], runContext);
+        Queue.Enqueue(runContext, context, currentNodes[0]);
 
         return run.RunId;
     }
 
-
-
-    public static Task<IEnumerable<NodeEntity>> RunNode(RunContext runContext, NodeEntity node)
+    public static Task<List<NextNodeData>> RunNode(RunContext runContext, ContextObject nodeContext, NodeEntity node)
     {
         return node switch
         {
-            StartNodeEntity startNode => new StartNode(runContext, startNode).Run(),
-            EndNodeEntity endNode => new EndNode(runContext, endNode).Run(),
-            EditNodeEntity editNode => new EditNode(runContext, editNode).Run(),
-            CodeNodeEntity codeNode => new CodeNode(runContext, codeNode).Run(),
-            SwitchNodeEntity switchNode => new SwitchNode(runContext, switchNode).Run(),
-            FanInNodeEntity fanInNode => new FanInNode(runContext, fanInNode).Run(),
-            FanOutNodeEntity fanOutNode => new FanOutNode(runContext, fanOutNode).Run(),
+            StartNodeEntity startNode => new StartNode(runContext, nodeContext, startNode).Run(),
+            EndNodeEntity endNode => new EndNode(runContext, nodeContext, endNode).Run(),
+            EditNodeEntity editNode => new EditNode(runContext, nodeContext, editNode).Run(),
+            CodeNodeEntity codeNode => new CodeNode(runContext, nodeContext, codeNode).Run(),
+            SwitchNodeEntity switchNode => new SwitchNode(runContext, nodeContext, switchNode).Run(),
+            FanInNodeEntity fanInNode => new FanInNode(runContext, nodeContext, fanInNode).Run(),
+            FanOutNodeEntity fanOutNode => new FanOutNode(runContext, nodeContext, fanOutNode).Run(),
             _ => throw new SharpOMaticException($"Unrecognized node type' {node.NodeType}'")
         };
     }

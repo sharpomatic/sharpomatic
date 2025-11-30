@@ -8,8 +8,8 @@ public class NodeExecutionService(INodeQueue queue) : BackgroundService
         {
             try
             {
-                var (node, context) = await queue.DequeueAsync(stoppingToken);
-                await ProcessNode(node, context);
+                var (runContext, contextObject, node) = await queue.DequeueAsync(stoppingToken);
+                await ProcessNode(runContext, contextObject, node);
             }
             catch (OperationCanceledException)
             {
@@ -22,15 +22,13 @@ public class NodeExecutionService(INodeQueue queue) : BackgroundService
         }
     }
 
-    private async Task ProcessNode(NodeEntity node, RunContext context)
+    private async Task ProcessNode(RunContext runContext, ContextObject nodeContext, NodeEntity node)
     {
         try
         {
-            var nextNodes = await EngineService.RunNode(context, node);
+            var nextNodes = await EngineService.RunNode(runContext, nodeContext, node);
             foreach (var nextNode in nextNodes)
-            {
-                queue.Enqueue(nextNode, context);
-            }
+                queue.Enqueue(runContext, nextNode.NodeContext, nextNode.Node);
         }
         catch
         {

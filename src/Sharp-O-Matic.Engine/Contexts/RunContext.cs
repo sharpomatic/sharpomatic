@@ -11,21 +11,18 @@ public class RunContext
     public IEnumerable<JsonConverter> JsonConverters { get; init; }
     public WorkflowEntity Workflow { get; init; }
     public Guid RunId { get; init; }
-    public ContextObject NodeContext { get; set; }
 
     public RunContext(IRepository repository, 
                       INotification notifications,
                       IEnumerable<JsonConverter> jsonConverters,
                       WorkflowEntity workflow, 
-                      Guid runId,
-                      ContextObject nodeContext)
+                      Guid runId)
     {
         Repository = repository;
         Notifications = notifications;
         JsonConverters = jsonConverters;
         Workflow = workflow;
         RunId = runId;
-        NodeContext = nodeContext;
 
         foreach (var node in workflow.Nodes)
         {
@@ -47,15 +44,12 @@ public class RunContext
         return ResolveOutput(node.Outputs[0]);
     }
 
-    public IEnumerable<NodeEntity> ResolveMultipleOutputs(NodeEntity node)
+    public List<NodeEntity> ResolveMultipleOutputs(NodeEntity node)
     {
         var nodes = new List<NodeEntity>();
         foreach (var connector in node.Outputs)
-        {
-            var nextNode = ResolveOutput(connector);
-            if (nextNode != null)
-                nodes.Add(nextNode);
-        }
+            nodes.Add(ResolveOutput(connector));
+
         return nodes;
     }
 
@@ -72,8 +66,6 @@ public class RunContext
 
         return nextNode;
     }
-
-
 
     public string TypedSerialization(ContextObject nodeContext)
     {

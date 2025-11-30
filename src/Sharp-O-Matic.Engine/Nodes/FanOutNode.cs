@@ -1,35 +1,18 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
-public class FanOutNode(RunContext runContext, FanOutNodeEntity node)
-    : RunNode<FanOutNodeEntity>(runContext, node)
+public class FanOutNode(RunContext runContext, ContextObject nodeContext, FanOutNodeEntity node) : RunNode<FanOutNodeEntity>(runContext, nodeContext, node)
 {
-    public override async Task<IEnumerable<NodeEntity>> Run()
+    protected override async Task<(string, List<NextNodeData>)> RunInternal()
     {
-        await base.Run();
+        var resolveNodes = RunContext.ResolveMultipleOutputs(Node);
 
-        try
+        List<NextNodeData> nextNodes = [];
+        foreach(var resolveNode in resolveNodes)
         {
-            // Resolve all outputs for FanOut
-            var nextNodes = RunContext.ResolveMultipleOutputs(Node);
-
-            Trace.Message = "Threads started";
-            Trace.NodeStatus = NodeStatus.Success;
-            Trace.Finished = DateTime.Now;
-            Trace.OutputContext = RunContext.TypedSerialization(RunContext.NodeContext);
-            await NodeUpdated();
-
-            return nextNodes;
+            // TODO copy using serialization
+            nextNodes.Add(new NextNodeData(NodeContext, resolveNode));
         }
-        catch (Exception ex)
-        {
-            Trace.NodeStatus = NodeStatus.Failed;
-            Trace.Finished = DateTime.Now;
-            Trace.Message = "Failed";
-            Trace.Error = ex.Message;
-            Trace.OutputContext = RunContext.TypedSerialization(RunContext.NodeContext);
-            await NodeUpdated();
 
-            throw;
-        }
+        return ($"{nextNodes.Count} threads started", nextNodes);
     }
 }

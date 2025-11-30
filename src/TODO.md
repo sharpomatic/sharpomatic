@@ -3,8 +3,9 @@
 
 # Minimum Viable Product Features
 
-End Node
-	- Do not need to finish on an end mode, just when all threads are completed, but uses the last End Node processed for the output
+Add run context, total running threads, decrement when not returned nodes, at zero close the workflow
+Add run context, add the last seen end node context so closing workflow returns that else the node just processed.
+Add fancontext to queue and nextnode and handle
 
 FanOut
 	- Defined list of at least 2 outputs that are then run in parallel
