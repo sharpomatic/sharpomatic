@@ -1,4 +1,6 @@
-﻿namespace SharpOMatic.Engine.Nodes;
+﻿using System.Net.NetworkInformation;
+
+namespace SharpOMatic.Engine.Nodes;
 
 public class EndNode(RunContext runContext, ContextObject nodeContext, EndNodeEntity node) : RunNode<EndNodeEntity>(runContext, nodeContext, node)
 {
@@ -32,6 +34,9 @@ public class EndNode(RunContext runContext, ContextObject nodeContext, EndNodeEn
         }
         else
             Trace.Message = "Exited workflow";
+
+        // Last run EndNode has its output used as the output of the workflow
+        RunContext.Run.OutputContext = RunContext.TypedSerialization(NodeContext);
 
         return (Trace.Message, []);
     }

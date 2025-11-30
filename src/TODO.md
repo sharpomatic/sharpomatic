@@ -3,8 +3,6 @@
 
 # Minimum Viable Product Features
 
-Error during execution of a node
-Add run context, add the last seen end node context so closing workflow returns that else the node just processed.
 Add fancontext to queue and nextnode and handle
 
 FanOut
@@ -16,8 +14,6 @@ FanIn
 	- All arriving inputs must be at the same level (depth) and fan out instance as the first that arrives
 	- Automatically merges the incoming contexts into a new context, if more than 1 value then they get turned into array
 	- Show the input for each arriving task and single merged output context
-
-Any Node that fails should record the error and kill all the others nodes for that workflow
 
 Model Call
 	- Specify model from registry

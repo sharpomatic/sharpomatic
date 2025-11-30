@@ -9,7 +9,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 builder.Services.AddSignalR();
 builder.Services.AddSharpOMaticEngine();
-builder.Services.AddSingleton<INotification, SharpOMaticNotification>();
+builder.Services.AddSingleton<INotification, NotificationService>();
 builder.Services.AddDbContextFactory<SharpOMaticDbContext>(options =>
 {
     var folder = Environment.SpecialFolder.LocalApplicationData;

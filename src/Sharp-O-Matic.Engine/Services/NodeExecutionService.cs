@@ -9,15 +9,15 @@ public class NodeExecutionService(INodeQueue queue) : BackgroundService
             try
             {
                 var (runContext, contextObject, node) = await queue.DequeueAsync(stoppingToken);
-                await ProcessNode(runContext, contextObject, node);
+
+                // If the workflow has already been failed, then ignore the node execution
+                if (runContext.Run.RunStatus != RunStatus.Failed)
+                    await ProcessNode(runContext, contextObject, node);
             }
             catch (OperationCanceledException)
             {
                 // Graceful shutdown
                 break;
-            }
-            catch
-            {
             }
         }
     }
@@ -33,7 +33,11 @@ public class NodeExecutionService(INodeQueue queue) : BackgroundService
                 runContext.Run.RunStatus = RunStatus.Success;
                 runContext.Run.Message = "Success";
                 runContext.Run.Stopped = DateTime.Now;
-                runContext.Run.OutputContext = runContext.TypedSerialization(nodeContext);
+
+                // If no EndNode was encountered then use the output of the last run node
+                if (runContext.Run.OutputContext is null)
+                    runContext.Run.OutputContext = runContext.TypedSerialization(nodeContext);
+
                 await runContext.RunUpdated();
             }
             else
@@ -44,7 +48,16 @@ public class NodeExecutionService(INodeQueue queue) : BackgroundService
         }
         catch (Exception ex)
         {
-            // TODO, handle exception in the node, decrement count by one and then finish up
+            runContext.Run.RunStatus = RunStatus.Failed;
+            runContext.Run.Message = "Failed";
+            runContext.Run.Error = ex.Message;
+            runContext.Run.Stopped = DateTime.Now;
+
+            // If no EndNode was encountered then use the output of the last run node
+            if (runContext.Run.OutputContext is null)
+                runContext.Run.OutputContext = runContext.TypedSerialization(nodeContext);
+
+            await runContext.RunUpdated();
         }
     }
 }
