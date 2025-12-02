@@ -3,6 +3,13 @@
 
 # Minimum Viable Product Features
 
+Bugs
+  Double check the fan out and fan in
+     does it had double layers
+	 does it error when not all outputs go to the fan in
+	 what happens if one of the threads errors
+
+
 Model Call
 	- Specify model from registry
 	- Specify instructions
@@ -50,8 +57,6 @@ Build
 Connection
 	Do not use dialog to overlay, instead have an error bar that covers the top of the page
 
-Errors
-	All errors should show toastie with error message
 
 Leaving unsaved page
 	Should ask user if they really want to leave

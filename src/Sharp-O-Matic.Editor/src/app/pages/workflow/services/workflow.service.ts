@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { ContextEntryListEntity, ContextEntryListSnapshot } from '../../../entities/definitions/context-entry-list.entity';
 import { ContextEntryEntity, ContextEntrySnapshot } from '../../../entities/definitions/context-entry.entity';
 import { StartNodeEntity } from '../../../entities/definitions/start-node.entity';
+import { ToastService } from '../../../services/toast.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,6 +18,7 @@ import { StartNodeEntity } from '../../../entities/definitions/start-node.entity
 export class WorkflowService implements OnDestroy  {
   private readonly serverWorkflowService = inject(ServerRepositoryService);
   public readonly signalrService = inject(SignalrService);
+  private readonly toastService = inject(ToastService);
 
   public workflow: WritableSignal<WorkflowEntity>;
   public runProgress: WritableSignal<RunProgressModel | undefined>;
@@ -128,11 +130,18 @@ export class WorkflowService implements OnDestroy  {
         case RunStatus.Success: {
           this.runProgress.set(data);
           this.isRunning.set(false);
+          const workflowName = workflow.name();
+          const successMessage = `${workflowName} completed successfully.`;
+          this.toastService.success(successMessage);
           break;
         }
         case RunStatus.Failed: {
           this.runProgress.set(data);
           this.isRunning.set(false);
+          const workflowName = workflow.name();
+          const errorMessage = (data.error ?? '').trim();
+          const failureMessage = errorMessage ? `${workflowName} failed: ${errorMessage}` : `${workflowName} failed.`;
+          this.toastService.error(failureMessage);
           break;
         }
       }

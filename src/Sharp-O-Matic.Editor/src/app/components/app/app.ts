@@ -4,6 +4,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { ServerConnectionService } from '../../services/server.connection.service';
 import { NotConnectedDialogComponent } from '../../dialogs/not-connected/not-connected-dialog.component';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-root',
@@ -22,6 +23,7 @@ import { NotConnectedDialogComponent } from '../../dialogs/not-connected/not-con
 export class App implements OnInit, OnDestroy {
   private readonly serverConnectionService = inject(ServerConnectionService);
   private readonly modalService = inject(BsModalService);
+  protected readonly toastService = inject(ToastService);
   private modalRef?: BsModalRef;
 
   activeTheme: string = 'auto';
