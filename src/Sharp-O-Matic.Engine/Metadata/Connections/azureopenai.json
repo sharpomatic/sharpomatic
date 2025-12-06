@@ -1,0 +1,33 @@
+{
+  "Id": "azureopenai",
+  "DisplayName": "Azure OpenAI",
+  "Description": "",
+  "AuthModes": [
+    {
+      "Id": "apikey",
+      "DisplayName": "API Key",
+      "Kind": 0,
+      "IsDefault": true,
+      "Fields": [
+        {
+          "Name": "endpoint",
+          "Label": "URL",
+          "Description": "Azure End Point",
+          "Type": 0,
+          "IsRequired": true,
+          "DefaultValue": "https://",
+          "EnumOptions": []
+        },
+        {
+          "Name": "apikey",
+          "Label": "Key",
+          "Description": "End Point API Key",
+          "Type": 1,
+          "IsRequired": true,
+          "DefaultValue": "",
+          "EnumOptions": []
+        }
+      ]
+    }
+  ]
+}
