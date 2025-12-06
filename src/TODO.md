@@ -4,6 +4,7 @@
 # Minimum Viable Product Features
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
+Scrolling on workflows, connectors, connector, status
 
 Model Call
 	- Specify model from registry

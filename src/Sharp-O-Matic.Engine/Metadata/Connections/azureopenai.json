@@ -28,6 +28,32 @@
           "EnumOptions": []
         }
       ]
+    },
+    {
+      "Id": "other",
+      "DisplayName": "Other",
+      "Kind": 0,
+      "IsDefault": true,
+      "Fields": [
+        {
+          "Name": "other1",
+          "Label": "URL",
+          "Description": "Azure End Point",
+          "Type": 2,
+          "IsRequired": true,
+          "DefaultValue": "true",
+          "EnumOptions": []
+        },
+        {
+          "Name": "other2",
+          "Label": "Key",
+          "Description": "End Point API Key",
+          "Type": 3,
+          "IsRequired": true,
+          "DefaultValue": "",
+          "EnumOptions": [ "uno", "dos", "tres" ]
+        }
+      ]
     }
   ]
 }
