@@ -17,6 +17,20 @@ namespace SharpOMatic.Engine.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.0");
 
+            modelBuilder.Entity("SharpOMatic.Engine.Repository.ConnectionMetadata", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Config")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ConnectionMetadata");
+                });
+
             modelBuilder.Entity("SharpOMatic.Engine.Repository.Run", b =>
                 {
                     b.Property<Guid>("RunId")

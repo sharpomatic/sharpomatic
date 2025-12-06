@@ -5,6 +5,7 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Design;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
+global using SharpOMatic.Engine.Connections;
 global using SharpOMatic.Engine.Contexts;
 global using SharpOMatic.Engine.DataTransferObjects;
 global using SharpOMatic.Engine.Entities;

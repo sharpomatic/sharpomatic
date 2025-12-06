@@ -16,7 +16,7 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
 
     public async Task<WorkflowEntity> GetWorkflow(Guid workflowId)
     {
-        using var dbContext = dbContextFactory.CreateDbContext();        
+        using var dbContext = dbContextFactory.CreateDbContext();
 
         var workflow = await (from w in dbContext.Workflows
                               where w.WorkflowId == workflowId
@@ -25,13 +25,13 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
         return workflow is null
             ? throw new SharpOMaticException($"Workflow '{workflowId}' cannot be found.")
             : new WorkflowEntity()
-        {
-            Id = workflow.WorkflowId,
-            Name = workflow.Named,
-            Description = workflow.Description,
-            Nodes = System.Text.Json.JsonSerializer.Deserialize<NodeEntity[]>(workflow.Nodes, _options)!,
-            Connections = System.Text.Json.JsonSerializer.Deserialize<ConnectionEntity[]>(workflow.Connections, _options)!,
-        };
+            {
+                Id = workflow.WorkflowId,
+                Name = workflow.Named,
+                Description = workflow.Description,
+                Nodes = JsonSerializer.Deserialize<NodeEntity[]>(workflow.Nodes, _options)!,
+                Connections = JsonSerializer.Deserialize<ConnectionEntity[]>(workflow.Connections, _options)!,
+            };
     }
 
     public async Task UpsertWorkflow(WorkflowEntity workflow)
@@ -58,12 +58,12 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
 
         entry.Named = workflow.Name;
         entry.Description = workflow.Description;
-        entry.Nodes = System.Text.Json.JsonSerializer.Serialize(workflow.Nodes, _options);
-        entry.Connections = System.Text.Json.JsonSerializer.Serialize(workflow.Connections, _options);
+        entry.Nodes = JsonSerializer.Serialize(workflow.Nodes, _options);
+        entry.Connections = JsonSerializer.Serialize(workflow.Connections, _options);
 
         await dbContext.SaveChangesAsync();
     }
-    
+
     public async Task DeleteWorkflow(Guid workflowId)
     {
         using var dbContext = dbContextFactory.CreateDbContext();
@@ -137,6 +137,44 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
         else
             dbContext.Entry(entity).CurrentValues.SetValues(trace);
 
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<ConnectionConfig?> GetConnectionConfig(string id)
+    {
+        var dbContext = dbContextFactory.CreateDbContext();
+
+        var entry = await (from c in dbContext.ConnectionMetadata
+                           where c.Id == id
+                           select c).AsNoTracking().FirstOrDefaultAsync();
+
+        if (entry is null)
+            return null;
+
+        return JsonSerializer.Deserialize<ConnectionConfig>(entry.Config, _options);
+
+    }
+
+    public async Task UpsertConnectionConfig(ConnectionConfig config)
+    {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        var entry = await (from c in dbContext.ConnectionMetadata
+                           where c.Id == config.Id
+                           select c).FirstOrDefaultAsync();
+
+        if (entry is null)
+        {
+            entry = new ConnectionMetadata()
+            {
+                Id = config.Id,
+                Config = ""
+            };
+
+            dbContext.ConnectionMetadata.Add(entry);
+        }
+
+        entry.Config = JsonSerializer.Serialize(config, _options);
         await dbContext.SaveChangesAsync();
     }
 }

@@ -12,6 +12,18 @@ namespace SharpOMatic.Engine.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ConnectionMetadata",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Config = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConnectionMetadata", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Runs",
                 columns: table => new
                 {
@@ -76,6 +88,9 @@ namespace SharpOMatic.Engine.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ConnectionMetadata");
+
             migrationBuilder.DropTable(
                 name: "Runs");
 
