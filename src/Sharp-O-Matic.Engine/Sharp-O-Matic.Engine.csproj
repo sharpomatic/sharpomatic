@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Metadata\Connections\azureopenai.json" />
-    <EmbeddedResource Include="Metadata\Connections\openai.json" />
+    <EmbeddedResource Include="Metadata\Resources\ConnectionConfig\azureopenai.json" />
+    <EmbeddedResource Include="Metadata\Resources\ConnectionConfig\openai.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Metadata\Resources\ModelConfig\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

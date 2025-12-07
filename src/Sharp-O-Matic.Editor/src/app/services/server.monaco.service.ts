@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { catchError, Observable, of } from 'rxjs';
-import { CodeCheckResult  } from '../interfaces/code-check-result';
+import { CodeCheckResult  } from '../data-transfer-objects/code-check-result';
 import { ToastService } from './toast.service';
 import { SettingsService } from './settings.service';
 

@@ -1,6 +1,3 @@
-using SharpOMatic.Engine.Repository;
-using System.Configuration;
-
 namespace SharpOMatic.Engine.Services;
 
 public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContextFactory) : IRepository

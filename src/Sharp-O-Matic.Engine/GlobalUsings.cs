@@ -5,15 +5,17 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Design;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
-global using SharpOMatic.Engine.Connections;
 global using SharpOMatic.Engine.Contexts;
 global using SharpOMatic.Engine.DataTransferObjects;
-global using SharpOMatic.Engine.Entities;
+global using SharpOMatic.Engine.Entities.Definitions;
+global using SharpOMatic.Engine.Entities.Enumerations;
 global using SharpOMatic.Engine.Enumerations;
 global using SharpOMatic.Engine.Exceptions;
 global using SharpOMatic.Engine.FastSerializer;
 global using SharpOMatic.Engine.Helpers;
 global using SharpOMatic.Engine.Interfaces;
+global using SharpOMatic.Engine.Metadata.Definitions;
+global using SharpOMatic.Engine.Metadata.Enumerations;
 global using SharpOMatic.Engine.Nodes;
 global using SharpOMatic.Engine.Repository;
 global using System.Collections;
@@ -27,4 +29,5 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
+
 

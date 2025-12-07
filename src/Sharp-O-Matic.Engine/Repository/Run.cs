@@ -1,4 +1,5 @@
-﻿namespace SharpOMatic.Engine.Repository;
+﻿
+namespace SharpOMatic.Engine.Repository;
 
 public class Run
 {

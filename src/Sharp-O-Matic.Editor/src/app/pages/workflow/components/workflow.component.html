@@ -33,10 +33,12 @@
       </div>
     </div>
 
+    @if (activeTabId === 'design') {
     <button class="btn trace-toggle" (click)="toggleTracebar()">
       <i class="bi" [class.bi-layout-sidebar]="isTracebarClosed()"
         [class.bi-layout-sidebar-inset]="!isTracebarClosed()"></i>
     </button>
+    }
   </div>
 
   <!-- Tabs for main content-->
@@ -65,9 +67,8 @@
       </div>
       <div class="mb-3 description">
         <label for="workflow-description" class="form-label">Description</label>
-        <textarea class="form-control" id="workflow-description" rows="3"
-          [ngModel]="workflowService.workflow().description()"
-          (ngModelChange)="workflowService.workflow().description.set($event)"></textarea>
+        <input type="text" class="form-control" id="workflow-description" [ngModel]="workflowService.workflow().description()"
+            (ngModelChange)="workflowService.workflow().description.set($event)" />          
       </div>
     </div>
   </ng-template>
