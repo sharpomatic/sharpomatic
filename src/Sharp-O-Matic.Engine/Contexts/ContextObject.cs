@@ -87,7 +87,7 @@ public class ContextObject : IDictionary<string, object?>
         throw new SharpOMaticException($"Value at '{path}' is of type '{actual}', not '{typeof(T).FullName}'.");
     }
 
-    public bool TryGet<T>(string path, [MaybeNullWhen(false)] out T value)
+    public bool TryGet<T>(string path, out T? value)
     {
         value = default!;
 

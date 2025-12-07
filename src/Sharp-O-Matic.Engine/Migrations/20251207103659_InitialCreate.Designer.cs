@@ -11,7 +11,7 @@ using SharpOMatic.Engine.Repository;
 namespace SharpOMatic.Engine.Migrations
 {
     [DbContext(typeof(SharpOMaticDbContext))]
-    [Migration("20251206053747_InitialCreate")]
+    [Migration("20251207103659_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -55,6 +55,43 @@ namespace SharpOMatic.Engine.Migrations
                     b.HasKey("ConnectionId");
 
                     b.ToTable("ConnectionMetadata");
+                });
+
+            modelBuilder.Entity("SharpOMatic.Engine.Repository.ModelConfigMetadata", b =>
+                {
+                    b.Property<string>("ConfigId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Config")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ConfigId");
+
+                    b.ToTable("ModelConfigMetadata");
+                });
+
+            modelBuilder.Entity("SharpOMatic.Engine.Repository.ModelMetadata", b =>
+                {
+                    b.Property<Guid>("ModelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Config")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ModelId");
+
+                    b.ToTable("ModelMetadata");
                 });
 
             modelBuilder.Entity("SharpOMatic.Engine.Repository.Run", b =>

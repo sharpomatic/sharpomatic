@@ -3,7 +3,7 @@
 
 # Minimum Viable Product Features
 
-Scrolling on workflows, connectors, connector, status
+Scrolling on workflows, connectors, connector, models, model, status pages
 
 Model Call
 	- Specify model from registry
@@ -47,6 +47,7 @@ Leaving unsaved page
 	Should ask user if they really want to leave
 
 Database
+	Add a version field to all serializable data, like workflow, connector, model, run, trace so easier to upgrade in future
 	Add indexes on fields that are part of ordering queries
 	Deleting a workflow, deletes the runs and traces for it
 	How to let the user connect to different databases instead of sqlite.

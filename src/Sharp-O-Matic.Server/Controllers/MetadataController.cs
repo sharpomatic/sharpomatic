@@ -41,4 +41,40 @@ public class MetadataController(IRepository repository) : ControllerBase
         await repository.DeleteConnection(id);
     }
 
+    [HttpGet("model-configs")]
+    public async Task<IEnumerable<ModelConfig>> GetModelConfigs()
+    {
+        return await repository.GetModelConfigs();
+    }
+
+    [HttpGet("models")]
+    public Task<List<ModelSummary>> GetModelSummaries(IRepository repository)
+    {
+        return (from m in repository.GetModels()
+                orderby m.Name
+                select new ModelSummary()
+                {
+                    ModelId = m.ModelId,
+                    Name = m.Name,
+                    Description = m.Description,
+                }).ToListAsync();
+    }
+
+    [HttpGet("models/{id}")]
+    public async Task<ActionResult<Model>> GetModel(IRepository repository, Guid id)
+    {
+        return await repository.GetModel(id);
+    }
+
+    [HttpPost("models")]
+    public async Task UpsertModel(IRepository repository, [FromBody] Model model)
+    {
+        await repository.UpsertModel(model);
+    }
+
+    [HttpDelete("models/{id}")]
+    public async Task DeleteModel(IRepository repository, Guid id)
+    {
+        await repository.DeleteModel(id);
+    }
 }

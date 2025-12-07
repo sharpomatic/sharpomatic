@@ -7,6 +7,8 @@ public class SharpOMaticDbContext : DbContext
     public DbSet<Trace> Traces { get; set; }
     public DbSet<ConnectionConfigMetadata> ConnectionConfigMetadata { get; set; }
     public DbSet<ConnectionMetadata> ConnectionMetadata { get; set; }
+    public DbSet<ModelConfigMetadata> ModelConfigMetadata { get; set; }
+    public DbSet<ModelMetadata> ModelMetadata { get; set; }
 
     public SharpOMaticDbContext(DbContextOptions<SharpOMaticDbContext> options)
         : base(options)

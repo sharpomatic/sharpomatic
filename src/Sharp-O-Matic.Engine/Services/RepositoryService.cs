@@ -8,6 +8,9 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
         Converters = { new NodeEntityConverter() }
     };
 
+    // ------------------------------------------------
+    // Workflow Operations
+    // ------------------------------------------------
     public IQueryable<Workflow> GetWorkflows()
     {
         var dbContext = dbContextFactory.CreateDbContext();
@@ -79,6 +82,9 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
         await dbContext.SaveChangesAsync();
     }
 
+    // ------------------------------------------------
+    // Run Operations
+    // ------------------------------------------------
     public IQueryable<Run> GetRuns()
     {
         var dbContext = dbContextFactory.CreateDbContext();
@@ -109,6 +115,10 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
         await dbContext.SaveChangesAsync();
     }
 
+
+    // ------------------------------------------------
+    // Trace Operations
+    // ------------------------------------------------
     public IQueryable<Trace> GetTraces()
     {
         var dbContext = dbContextFactory.CreateDbContext();
@@ -140,6 +150,9 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
         await dbContext.SaveChangesAsync();
     }
 
+    // ------------------------------------------------
+    // ConnectionConfig Operations
+    // ------------------------------------------------
     public async Task<ConnectionConfig?> GetConnectionConfig(string configId)
     {
         var dbContext = dbContextFactory.CreateDbContext();
@@ -195,6 +208,9 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
         await dbContext.SaveChangesAsync();
     }
 
+    // ------------------------------------------------
+    // Connection Operations
+    // ------------------------------------------------
     public IQueryable<ConnectionMetadata> GetConnections()
     {
         var dbContext = dbContextFactory.CreateDbContext();
@@ -273,6 +289,147 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
 
         if (metadata is null)
             throw new SharpOMaticException($"Connection '{connectionId}' cannot be found.");
+
+        dbContext.Remove(metadata);
+        await dbContext.SaveChangesAsync();
+    }
+
+    // ------------------------------------------------
+    // ModelConfig Operations
+    // ------------------------------------------------
+    public async Task<ModelConfig?> GetModelConfig(string configId)
+    {
+        var dbContext = dbContextFactory.CreateDbContext();
+
+        var metadata = await (from m in dbContext.ModelConfigMetadata
+                              where m.ConfigId == configId
+                              select m).AsNoTracking().FirstOrDefaultAsync();
+
+        if (metadata is null)
+            return null;
+
+        return JsonSerializer.Deserialize<ModelConfig>(metadata.Config, _options);
+
+    }
+
+    public async Task<List<ModelConfig>> GetModelConfigs()
+    {
+        var dbContext = dbContextFactory.CreateDbContext();
+
+        var entries = await dbContext.ModelConfigMetadata.AsNoTracking().ToListAsync();
+
+        var results = new List<ModelConfig>();
+        foreach (var entry in entries)
+        {
+            var config = JsonSerializer.Deserialize<ModelConfig>(entry.Config, _options);
+            if (config != null)
+                results.Add(config);
+        }
+
+        return results;
+    }
+
+    public async Task UpsertModelConfig(ModelConfig config)
+    {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        var metadata = await (from m in dbContext.ModelConfigMetadata
+                              where m.ConfigId == config.ConfigId
+                              select m).FirstOrDefaultAsync();
+
+        if (metadata is null)
+        {
+            metadata = new ModelConfigMetadata()
+            {
+                ConfigId = config.ConfigId,
+                Config = ""
+            };
+
+            dbContext.ModelConfigMetadata.Add(metadata);
+        }
+
+        metadata.Config = JsonSerializer.Serialize(config, _options);
+        await dbContext.SaveChangesAsync();
+    }
+
+    // ------------------------------------------------
+    // Model Operations
+    // ------------------------------------------------
+    public IQueryable<ModelMetadata> GetModels()
+    {
+        var dbContext = dbContextFactory.CreateDbContext();
+        return dbContext.ModelMetadata;
+    }
+
+    public async Task<Model> GetModel(Guid modelId)
+    {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        var metadata = await (from m in dbContext.ModelMetadata
+                              where m.ModelId == modelId
+                              select m).AsNoTracking().FirstOrDefaultAsync();
+
+        if (metadata is null)
+            throw new SharpOMaticException($"Model '{modelId}' cannot be found.");
+
+        var model = JsonSerializer.Deserialize<Model>(metadata.Config);
+
+        if (model is null)
+            throw new SharpOMaticException($"Model '{modelId}' configuration is invalid.");
+
+        // We need to ensure that any parameter that is a secret, is replaced to prevent it being available in the client
+        if ((model.ParameterValues.Count > 0) && !string.IsNullOrWhiteSpace(model.ConfigId))
+        {
+            var config = await GetModelConfig(model.ConfigId);
+            if (config is not null)
+            {
+                foreach (var field in config.ParameterFields)
+                    if ((field.Type == FieldDescriptorType.Secret) && model.ParameterValues.ContainsKey(field.Name))
+                        model.ParameterValues[field.Name] = "**********";
+            }
+        }
+
+        return model;
+    }
+
+    public async Task UpsertModel(Model model)
+    {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        var entry = await (from m in dbContext.ModelMetadata
+                           where m.ModelId == model.ModelId
+                           select m).FirstOrDefaultAsync();
+
+        if (entry is null)
+        {
+            entry = new ModelMetadata()
+            {
+                ModelId = model.ModelId,
+                Name = "",
+                Description = "",
+                Config = ""
+            };
+
+            dbContext.ModelMetadata.Add(entry);
+        }
+
+        entry.Name = model.Name;
+        entry.Description = model.Description;
+        entry.Config = JsonSerializer.Serialize(model);
+
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteModel(Guid modelId)
+    {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        var metadata = await (from m in dbContext.ModelMetadata
+                              where m.ModelId == modelId
+                              select m).FirstOrDefaultAsync();
+
+        if (metadata is null)
+            throw new SharpOMaticException($"Model '{modelId}' cannot be found.");
 
         dbContext.Remove(metadata);
         await dbContext.SaveChangesAsync();

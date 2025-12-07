@@ -38,6 +38,32 @@ namespace SharpOMatic.Engine.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ModelConfigMetadata",
+                columns: table => new
+                {
+                    ConfigId = table.Column<string>(type: "TEXT", nullable: false),
+                    Config = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ModelConfigMetadata", x => x.ConfigId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ModelMetadata",
+                columns: table => new
+                {
+                    ModelId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Config = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ModelMetadata", x => x.ModelId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Runs",
                 columns: table => new
                 {
@@ -107,6 +133,12 @@ namespace SharpOMatic.Engine.Migrations
 
             migrationBuilder.DropTable(
                 name: "ConnectionMetadata");
+
+            migrationBuilder.DropTable(
+                name: "ModelConfigMetadata");
+
+            migrationBuilder.DropTable(
+                name: "ModelMetadata");
 
             migrationBuilder.DropTable(
                 name: "Runs");
