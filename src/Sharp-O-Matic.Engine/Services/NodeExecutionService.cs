@@ -88,11 +88,18 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
 
     private async Task LoadMetadata()
     {
+        await LoadMetadata<ConnectionConfig>("Metadata.Resources.ConnectionConfig", (repo, config) => repo.UpsertConnectionConfig(config));
+        await LoadMetadata<ModelConfig>("Metadata.Resources.ModelConfig", (repo, config) => repo.UpsertModelConfig(config));
+    }
+
+    private async Task LoadMetadata<T>(string resourceFilter, Func<IRepository, T, Task> upsertAction)
+    {
         using (var scope = scopeFactory.CreateScope())
         {
             var repository = scope.ServiceProvider.GetRequiredService<IRepository>();
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceNames = assembly.GetManifestResourceNames().Where(name => name.Contains("Metadata.Connections") && name.EndsWith(".json"));
+            var resourceNames = assembly.GetManifestResourceNames()
+                .Where(name => name.Contains(resourceFilter) && name.EndsWith(".json"));
 
             foreach (var resourceName in resourceNames)
             {
@@ -101,19 +108,19 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
                     using var stream = assembly.GetManifestResourceStream(resourceName);
                     if (stream != null)
                     {
-                        var config = await JsonSerializer.DeserializeAsync<ConnectionConfig>(stream);
+                        var config = await JsonSerializer.DeserializeAsync<T>(stream);
                         if (config != null)
                         {
-                            await repository.UpsertConnectionConfig(config);
+                            await upsertAction(repository, config);
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Failed to load connection metadata from {resourceName}: {ex.Message}");
+                    Console.WriteLine($"Failed to load metadata from {resourceName}: {ex.Message}");
                 }
             }
-        }        
+        }
     }
 
     private static Task<List<NextNodeData>> RunNode(ThreadContext threadContext, NodeEntity node)
