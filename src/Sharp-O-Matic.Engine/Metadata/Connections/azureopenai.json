@@ -10,7 +10,7 @@
       "IsDefault": true,
       "Fields": [
         {
-          "Name": "apikey_endpoint",
+          "Name": "endpoint",
           "Label": "End Point",
           "Description": "Azure End Point",
           "Type": 0,
@@ -19,7 +19,7 @@
           "EnumOptions": []
         },
         {
-          "Name": "apikey_key",
+          "Name": "key",
           "Label": "Key",
           "Description": "End Point API Key",
           "Type": 1,

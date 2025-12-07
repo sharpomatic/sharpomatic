@@ -15,11 +15,8 @@ Model Call
 	- Show the input and output context
 
 Model Registry
-	- Define OpenAI direct and Azure OpenAI as connectors
 	- Define model name
-	- Define end point
 	- Define authentication, start with just api key, secret name, (for secrets.json) and then other which means you handle it in overrides
-	- Allow user to optionally specify the parameters allowed for OpenAIExecutionSettings
 	- Add test button to check connectivity
 
 # Integration Overrides
@@ -37,7 +34,6 @@ Build
 
 # Process
 
-- Domain name
 - GitHub account
   - Manual build (or tag) to create and publish a release
   - Docusaurus setup for generated static pages site (auto build and publish on changes)
@@ -51,12 +47,14 @@ Leaving unsaved page
 	Should ask user if they really want to leave
 
 Database
-	Add indexes on fields that are part of ordering queries, listy created for run and runId in trace
-	Deleting a workflow, deleteds the runs and traces for it
+	Add indexes on fields that are part of ordering queries
+	Deleting a workflow, deletes the runs and traces for it
+	How to let the user connect to different databases instead of sqlite.
+
+
+# Futures
 
 Server
 	Integrate use of OmniSharp for full intellisense
 
-Angular
-	Look into barrel files to easier imports between areas.
 

@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Metadata\Connections\openai.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="Metadata\Connections\azureopenai.json" />
     <EmbeddedResource Include="Metadata\Connections\openai.json" />
   </ItemGroup>
