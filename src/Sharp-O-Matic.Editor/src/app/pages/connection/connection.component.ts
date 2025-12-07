@@ -65,6 +65,7 @@ export class ConnectionComponent implements OnInit {
 
     const configs = this.connectionConfigs();
     this.connectionConfig = configs.find(config => config.configId === configId) ?? null;
+    debugger;
     this.connection.configId.set(this.connectionConfig?.configId ?? '');
 
     this.ensureAuthMode(resetFieldValues);
@@ -76,23 +77,96 @@ export class ConnectionComponent implements OnInit {
   }
 
   public getFieldValue(field: FieldDescriptor): string {
-    const value = this.connection.fieldValues().get(field.name);
-
-    if (value != null) {
-      return value;
+    const fieldValues = this.connection.fieldValues();
+    if (fieldValues.has(field.name)) {
+      const value = fieldValues.get(field.name);
+      return value ?? '';
     }
 
-    if (field.defaultValue != null) {
-      return String(field.defaultValue);
-    }
-
-    return '';
+    return field.defaultValue != null ? String(field.defaultValue) : '';
   }
 
   public onFieldValueChange(field: FieldDescriptor, value: string): void {
     this.connection.fieldValues.update(map => {
       const next = new Map(map);
-      next.set(field.name, value ?? '');
+      next.set(field.name, value === '' ? null : value ?? '');
+      return next;
+    });
+  }
+
+  public onFieldStringBlur(field: FieldDescriptor, rawValue: string | null): void {
+    if (field.type === FieldDescriptorType.Secret) {
+      return;
+    }
+
+    if (rawValue !== '') {
+      return;
+    }
+
+    if (field.isRequired && field.defaultValue != null) {
+      this.connection.fieldValues.update(map => {
+        const next = new Map(map);
+        next.set(field.name, String(field.defaultValue));
+        return next;
+      });
+    }
+  }
+
+  public getFieldNumericValue(field: FieldDescriptor): string {
+    const fieldValues = this.connection.fieldValues();
+    if (fieldValues.has(field.name)) {
+      const value = fieldValues.get(field.name);
+      return value ?? '';
+    }
+
+    return field.defaultValue != null ? String(field.defaultValue) : '';
+  }
+
+  public onFieldNumericChange(field: FieldDescriptor, value: string | number): void {
+    this.connection.fieldValues.update(map => {
+      const next = new Map(map);
+      if (value === '' || value === null || value === undefined) {
+        next.set(field.name, null);
+      } else {
+        next.set(field.name, String(value));
+      }
+      return next;
+    });
+  }
+
+  public onFieldNumericBlur(field: FieldDescriptor, rawValue: string | null): void {
+    if (rawValue === null || rawValue === '') {
+      const shouldApplyDefault = field.isRequired && field.defaultValue != null;
+      const defaultValue = shouldApplyDefault ? String(field.defaultValue) : null;
+      this.connection.fieldValues.update(map => {
+        const next = new Map(map);
+        next.set(field.name, defaultValue);
+        return next;
+      });
+      return;
+    }
+
+    let numeric = Number(rawValue);
+    if (!Number.isFinite(numeric)) {
+      return;
+    }
+
+    if (field.type === FieldDescriptorType.Integer) {
+      numeric = Math.trunc(numeric);
+    }
+
+    if (field.min != null && numeric < field.min) {
+      numeric = field.min;
+    }
+
+    if (field.max != null && numeric > field.max) {
+      numeric = field.max;
+    }
+
+    const finalValue = numeric.toString();
+    this.connection.fieldValues.update(map => {
+      const next = new Map(map);
+      next.set(field.name, finalValue);
       return next;
     });
   }

@@ -16,9 +16,11 @@
         [ngModel]="connection.configId()"
         (ngModelChange)="onConnectionConfigChange($event)"
         [disabled]="!connectionConfigs().length">
-        <option *ngFor="let config of connectionConfigs()" [ngValue]="config.configId">
+        @for(config of connectionConfigs(); track config.configId) {
+        <option [ngValue]="config.configId">
           {{ config.displayName }}
         </option>
+        }
       </select>
     </div>
     @if (connectionConfig) {
@@ -39,21 +41,27 @@
           class="form-select"
           [ngModel]="connection.authenticationModeId()"
           (ngModelChange)="connection.authenticationModeId.set($event)"
-          [disabled]="!connectionConfig?.authModes?.length">
-          <option *ngFor="let mode of connectionConfig?.authModes" [ngValue]="mode.id">
+          [disabled]="!connectionConfig.authModes.length">
+          @for(mode of connectionConfig.authModes; track mode.id) {
+          <option [ngValue]="mode.id">
             {{ mode.displayName }}
           </option>
+          }
         </select>
       </div>
       @for (field of selectedAuthMode?.fields; track field.name) {      
-      <div class="mb-3 long">
+      <div class="mb-3" [ngClass]="{
+        'long': field.type !== fieldDescriptorType.Integer && field.type !== fieldDescriptorType.Double,
+        'tiny': field.type === fieldDescriptorType.Integer || field.type === fieldDescriptorType.Double
+      }">
         @if (field.type === fieldDescriptorType.String || field.type === fieldDescriptorType.Secret) {
         <label class="form-label">{{ field.label }} @if (!field.isRequired) {(Optional)} </label>
         <input
           [type]="field.type === fieldDescriptorType.Secret ? 'password' : 'text'"
           class="form-control"
           [ngModel]="getFieldValue(field)"
-          (ngModelChange)="onFieldValueChange(field, $event)"/>
+          (ngModelChange)="onFieldValueChange(field, $event)"
+          (blur)="onFieldStringBlur(field, $any($event.target).value)"/>
         }
 
         @if (field.type === fieldDescriptorType.Boolean) {
@@ -79,6 +87,17 @@
             <option [ngValue]="option">{{ option }}</option>
           }
         </select>
+        }
+
+        @if (field.type === fieldDescriptorType.Integer || field.type === fieldDescriptorType.Double) {
+        <label class="form-label">{{ field.label }} @if (!field.isRequired) {(Optional)} </label>
+        <input
+          type="number"
+          class="form-control"
+          [attr.step]="field.step ?? (field.type === fieldDescriptorType.Integer ? 1 : 'any')"
+          [ngModel]="getFieldNumericValue(field)"
+          (ngModelChange)="onFieldNumericChange(field, $event)"
+          (blur)="onFieldNumericBlur(field, $any($event.target).value)"/>
         }
       </div>
       }

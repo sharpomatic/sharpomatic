@@ -10,23 +10,59 @@
       "IsDefault": true,
       "Fields": [
         {
-          "Name": "endpoint",
-          "Label": "End Point",
-          "Description": "Azure End Point",
-          "Type": 4,
+          "Name": "string",
+          "Label": "string",
+          "Description": "string",
+          "Type": 0,
           "IsRequired": true,
-          "DefaultValue": 42
+          "DefaultValue": "(Default)"
         },
         {
-          "Name": "key",
-          "Label": "Key",
-          "Description": "End Point API Key",
+          "Name": "secret",
+          "Label": "secret",
+          "Description": "secret",
+          "Type": 1,
+          "IsRequired": true,
+          "DefaultValue": "secret"
+        },
+        {
+          "Name": "boolean",
+          "Label": "boolean",
+          "Description": "boolean",
+          "Type": 2,
+          "IsRequired": true,
+          "DefaultValue": true
+        },
+        {
+          "Name": "enum",
+          "Label": "enum",
+          "Description": "enum",
+          "Type": 3,
+          "IsRequired": true,
+          "DefaultValue": "dos",
+          "EnumOptions": ["uno", "dos", "tres", "quattro"]
+        },
+        {
+          "Name": "integer",
+          "Label": "integer (1-99) step 3",
+          "Description": "integer",
           "Type": 4,
           "IsRequired": true,
-          "DefaultValue": 8,
-          "Min": 4,
-          "Max": 20,
-          "Step": 2
+          "DefaultValue": 42,
+          "Min": 1,
+          "Max": 99,
+          "Step": 3
+        },
+        {
+          "Name": "double",
+          "Label": "double",
+          "Description": "double (1-99) step 1.5",
+          "Type": 5,
+          "IsRequired": true,
+          "DefaultValue": 3.14,
+          "Min": 1,
+          "Max": 99,
+          "Step": 1.5
         }
       ]
     }

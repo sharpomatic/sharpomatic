@@ -10,7 +10,7 @@ public class FieldDescriptor
     public required bool IsRequired { get; set; }
     public object? DefaultValue { get; set; }
     public List<string>? EnumOptions { get; set; }
-    public double? MinValue { get; set; }
-    public double? MaxValue { get; set; }
+    public double? Min { get; set; }
+    public double? Max { get; set; }
     public double? Step { get; set; }
 }
