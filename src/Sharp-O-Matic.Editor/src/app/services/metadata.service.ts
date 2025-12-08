@@ -29,7 +29,8 @@ export class MetadataService {
 
   private loadConnectionConfigs(): void {
     this.serverRepository.getConnectionConfigs().subscribe(configs => {
-      this._connectionConfigs.set(configs);
+      const sorted = [...configs].sort((a, b) => a.displayName.localeCompare(b.displayName));
+      this._connectionConfigs.set(sorted);
     });
   }
 

@@ -1,0 +1,289 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, Signal, computed, effect, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { ConnectionSummary } from '../../metadata/definitions/connection summary';
+import { FieldDescriptor } from '../../metadata/definitions/field-descriptor';
+import { Model } from '../../metadata/definitions/model';
+import { ModelCapabilities } from '../../metadata/definitions/model-capabilities';
+import { ModelConfig } from '../../metadata/definitions/model-config';
+import { FieldDescriptorType } from '../../metadata/enumerations/field-descriptor-type';
+import { MetadataService } from '../../services/metadata.service';
+import { ServerRepositoryService } from '../../services/server.repository.service';
+import { Connection } from '../../metadata/definitions/connection';
+
+@Component({
+  selector: 'app-model',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+  ],
+  templateUrl: './model.component.html',
+  styleUrls: ['./model.component.scss'],
+})
+export class ModelComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly serverRepository = inject(ServerRepositoryService);
+  private readonly metadataService = inject(MetadataService);
+
+  public model: Model = new Model(Model.defaultSnapshot());
+  public modelConfig: ModelConfig | null = null;
+  public readonly modelConfigs = this.metadataService.modelConfigs;
+  private readonly connectionConfigId = signal<string | null>(null);
+  public readonly availableModelConfigs: Signal<ModelConfig[]>;
+  public connectionSummaries: ConnectionSummary[] = [];
+  public readonly fieldDescriptorType = FieldDescriptorType;
+
+  constructor() {
+    this.availableModelConfigs = computed(() => {
+      const configId = this.connectionConfigId();
+      if (!configId) {
+        return [];
+      }
+
+      return this.modelConfigs()
+        .filter(cfg => cfg.connectionConfigId === configId)
+        .slice()
+        .sort((a, b) => a.displayName.localeCompare(b.displayName));
+    });
+
+    effect(() => {
+      const connectionId = this.model.connectionId();
+      this.loadConnectionConfig(connectionId);
+    });
+
+    effect(() => {
+      const configId = this.model.configId();
+      const configs = this.availableModelConfigs();
+      if (configId && configs.length) {
+        if (!this.modelConfig || this.modelConfig.configId !== configId) {
+          this.setModelConfig(configId, false);
+        }
+      } else {
+        this.modelConfig = null;
+      }
+    });
+
+    effect(() => {
+      const configs = this.availableModelConfigs();
+      const currentConfigId = this.model.configId();
+      if (!configs.length) {
+        if (currentConfigId) {
+          this.onModelConfigChange('');
+        }
+        return;
+      }
+
+      const isValid = configs.some(c => c.configId === currentConfigId);
+      if (!isValid) {
+        this.onModelConfigChange(configs[0].configId);
+      }
+    });
+
+  }
+
+  ngOnInit(): void {
+    this.serverRepository.getConnectionSummaries().subscribe(connections => {
+      this.connectionSummaries = [...connections].sort((a, b) => a.name.localeCompare(b.name));
+    });
+
+    const modelId = this.route.snapshot.paramMap.get('id');
+    if (modelId) {
+      this.serverRepository.getModel(modelId).subscribe(model => {
+        if (model) {
+          this.model = model;
+          this.setModelConfig(model.configId(), false);
+        }
+      });
+    }
+  }
+
+  save(): void {
+    this.serverRepository.upsertModel(this.model)
+      .subscribe(() => {
+        this.model?.markClean();
+    });
+  }
+
+  public onModelConfigChange(configId: string): void {
+    this.setModelConfig(configId, true);
+  }
+
+  public getParameterValue(field: FieldDescriptor): string {
+    const value = this.getResolvedParameterValue(field);
+    return value ?? '';
+  }
+
+  public onParameterValueChange(field: FieldDescriptor, value: string): void {
+    this.model.parameterValues.update(map => {
+      const next = new Map(map);
+      next.set(field.name, value === '' ? null : value ?? '');
+      return next;
+    });
+  }
+
+  public onParameterStringBlur(field: FieldDescriptor, rawValue: string | null): void {
+    if (field.type === FieldDescriptorType.Secret) {
+      return;
+    }
+
+    if (rawValue !== '') {
+      return;
+    }
+
+    if (field.isRequired && field.defaultValue != null) {
+      this.model.parameterValues.update(map => {
+        const next = new Map(map);
+        next.set(field.name, String(field.defaultValue));
+        return next;
+      });
+    }
+  }
+
+  public getParameterNumericValue(field: FieldDescriptor): string {
+    const value = this.getResolvedParameterValue(field);
+    return value ?? '';
+  }
+
+  public onParameterNumericChange(field: FieldDescriptor, value: string | number): void {
+    this.model.parameterValues.update(map => {
+      const next = new Map(map);
+      if (value === '' || value === null || value === undefined) {
+        next.set(field.name, null);
+      } else {
+        next.set(field.name, String(value));
+      }
+      return next;
+    });
+  }
+
+  public isFieldMissing(field: FieldDescriptor): boolean {
+    if (!field.isRequired) {
+      return false;
+    }
+
+    const value = this.getResolvedParameterValue(field);
+    return value === null || value === '';
+  }
+
+  public onParameterNumericBlur(field: FieldDescriptor, rawValue: string | null): void {
+    if (rawValue === null || rawValue === '') {
+      const shouldApplyDefault = field.isRequired && field.defaultValue != null;
+      const defaultValue = shouldApplyDefault ? String(field.defaultValue) : null;
+      this.model.parameterValues.update(map => {
+        const next = new Map(map);
+        next.set(field.name, defaultValue);
+        return next;
+      });
+      return;
+    }
+
+    let numeric = Number(rawValue);
+    if (!Number.isFinite(numeric)) {
+      return;
+    }
+
+    if (field.type === FieldDescriptorType.Integer) {
+      numeric = Math.trunc(numeric);
+    }
+
+    if (field.min != null && numeric < field.min) {
+      numeric = field.min;
+    }
+
+    if (field.max != null && numeric > field.max) {
+      numeric = field.max;
+    }
+
+    const finalValue = numeric.toString();
+    this.model.parameterValues.update(map => {
+      const next = new Map(map);
+      next.set(field.name, finalValue);
+      return next;
+    });
+  }
+
+  public getParameterBooleanValue(field: FieldDescriptor): boolean {
+    const value = this.model.parameterValues().get(field.name);
+
+    if (value != null) {
+      return value.toLowerCase() === 'true';
+    }
+
+    return field.defaultValue === true;
+  }
+
+  public onParameterBooleanChange(field: FieldDescriptor, checked: boolean): void {
+    this.model.parameterValues.update(map => {
+      const next = new Map(map);
+      next.set(field.name, checked ? 'true' : 'false');
+      return next;
+    });
+  }
+
+  private setModelConfig(configId: string, resetValues: boolean): void {
+    if (!configId) {
+      this.modelConfig = null;
+      this.model.configId.set('');
+      if (resetValues) {
+        this.model.parameterValues.set(new Map());
+        this.model.customCapabilities.set(ModelCapabilities.fromSnapshot(ModelCapabilities.defaultSnapshot()));
+      }
+      return;
+    }
+
+    const availableConfigs = this.availableModelConfigs();
+    const searchConfigs = availableConfigs.length ? availableConfigs : this.modelConfigs();
+    this.modelConfig = searchConfigs.find(config => config.configId === configId) ?? null;
+    this.model.configId.set(this.modelConfig?.configId ?? (availableConfigs.length ? '' : configId));
+
+    if (resetValues && this.modelConfig) {
+      this.model.customCapabilities.set(ModelCapabilities.fromSnapshot(this.modelConfig.capabilities.toSnapshot()));
+      this.resetParameterFieldsForConfig();
+    }
+  }
+
+  private resetParameterFieldsForConfig(): void {
+    const config = this.modelConfig;
+    if (!config) {
+      this.model.parameterValues.set(new Map());
+      return;
+    }
+
+    const next = new Map<string, string | null>();
+    config.parameterFields.forEach(field => {
+      if (field.defaultValue === null || field.defaultValue === undefined) {
+        next.set(field.name, null);
+      } else {
+        next.set(field.name, String(field.defaultValue));
+      }
+    });
+
+    this.model.parameterValues.set(next);
+  }
+
+  private getResolvedParameterValue(field: FieldDescriptor): string | null {
+    const parameterValues = this.model.parameterValues();
+    if (parameterValues.has(field.name)) {
+      return parameterValues.get(field.name) ?? null;
+    }
+
+    if (field.defaultValue != null) {
+      return String(field.defaultValue);
+    }
+
+    return null;
+  }
+
+  private loadConnectionConfig(connectionId: string | null): void {
+    if (!connectionId) {
+      this.connectionConfigId.set(null);
+      return;
+    }
+
+    this.serverRepository.getConnection(connectionId).subscribe((connection: Connection | null) => {
+      this.connectionConfigId.set(connection?.configId() ?? null);
+    });
+  }
+}

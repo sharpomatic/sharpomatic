@@ -1,0 +1,21 @@
+<div class="container-fluid p-0">
+  <div class="d-flex justify-content-between align-items-center p-3 pt-2 pb-1 bg-body-secondary">
+    <h2 class=""><i class="bi bi-cpu pe-3 icon-sm"></i>Models ({{ models.length }})</h2>
+    <button class="btn btn-primary" (click)="newModel()">New</button>
+  </div>
+  <hr class="m-0"/>
+  <div class="d-flex flex-wrap gap-3 p-3">
+    @for (model of models; track model.modelId) {
+      <div class="card workflow-card">
+        <div class="card-header">
+          <h5>{{ model.name }}</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text">{{ model.description }}</p>
+          <button class="btn btn-primary" [routerLink]="['/models', model.modelId]">Open</button>
+          <button class="btn btn-primary ms-2" (click)="deleteModel(model)">Delete</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

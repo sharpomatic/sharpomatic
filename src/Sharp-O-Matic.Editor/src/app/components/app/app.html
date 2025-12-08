@@ -33,6 +33,17 @@
           }
         </button>
     </li>
+    <li class="nav-item w-100">
+      <button class="nav-link w-100 d-flex" routerLink="/models" routerLinkActive="active"
+          #modelsLink="routerLinkActive"
+          [class.active]="modelsLink.isActive"
+          [class.link-body-emphasis]="!modelsLink.isActive">
+          <i class="bi bi-cpu" [class.me-3]="!isSidebarClosed"></i>
+          @if(!isSidebarClosed) {
+            <span>Models</span>
+          }
+        </button>
+    </li>
     <li class="nav-item w-100 ">
       <button class="nav-link w-100 d-flex" routerLink="/settings" routerLinkActive="active"
           #settingsLink="routerLinkActive"
