@@ -309,7 +309,8 @@ export class ModelComponent implements OnInit {
   }
 
   private buildParameterValuesForConfig(config: ModelConfig, previousValues: Map<string, string | null>): Map<string, string | null> {
-    const next = new Map<string, string | null>();
+    // Start with all previous values so switching away and back preserves user input
+    const next = new Map<string, string | null>(previousValues);
     config.parameterFields.forEach(field => {
       const capabilityOk = !field.capability || (this.isCapabilityEnabled(field.capability) && (!config.isCustom || this.isCustomCapabilityEnabled(field.capability)));
       if (!capabilityOk) {
