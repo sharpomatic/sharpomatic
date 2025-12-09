@@ -13,6 +13,8 @@ import { EditNodeEntity } from '../../../entities/definitions/edit-node.entity';
 import { ConnectionEntity } from '../../../entities/definitions/connection.entity';
 import { CodeNodeEntity } from '../../../entities/definitions/code-node.entity';
 import { CodeNodeDialogComponent } from '../../../dialogs/code-node/code-node-dialog.component';
+import { ModelCallNodeEntity } from '../../../entities/definitions/model-call-node.entity';
+import { ModelCallNodeDialogComponent } from '../../../dialogs/model-call-node/model-call-node-dialog.component';
 import { EndNodeEntity } from '../../../entities/definitions/end-node.entity';
 import { StartNodeDialogComponent } from '../../../dialogs/start-node/start-node-dialog.component';
 import { StartNodeEntity } from '../../../entities/definitions/start-node.entity';
@@ -237,6 +239,8 @@ export class DesignerComponent {
       this.dialogService.open(EndNodeDialogComponent, { node, nodeTraces });
     } else if (node instanceof CodeNodeEntity) {
       this.dialogService.open(CodeNodeDialogComponent, { node, nodeTraces });
+    } else if (node instanceof ModelCallNodeEntity) {
+      this.dialogService.open(ModelCallNodeDialogComponent, { node, nodeTraces });
     } else if (node instanceof EditNodeEntity) {
       this.dialogService.open(EditNodeDialogComponent, { node, nodeTraces });
     } else if (node instanceof SwitchNodeEntity) {

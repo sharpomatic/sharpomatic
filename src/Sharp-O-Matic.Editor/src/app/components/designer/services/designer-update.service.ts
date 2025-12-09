@@ -13,6 +13,7 @@ import { WorkflowEntity } from '../../../entities/definitions/workflow.entity';
 import { SwitchNodeEntity } from '../../../entities/definitions/switch-node.entity';
 import { FanInNodeEntity } from '../../../entities/definitions/fan-in-node.entity';
 import { FanOutNodeEntity } from '../../../entities/definitions/fan-out-node.entity';
+import { ModelCallNodeEntity } from '../../../entities/definitions/model-call-node.entity';
 
 @Injectable({
   providedIn: 'root',
@@ -61,6 +62,11 @@ export class DesignerUpdateService {
   addFanOutNode(workflow: WorkflowEntity) {
     const [top, left] = this.getAddLocation();
     workflow.nodes.update(nodes => [...nodes, FanOutNodeEntity.create(top, left)]);
+  }
+
+  addModelCallNode(workflow: WorkflowEntity) {
+    const [top, left] = this.getAddLocation();
+    workflow.nodes.update(nodes => [...nodes, ModelCallNodeEntity.create(top, left)]);
   }
 
   addConnection(workflow: WorkflowEntity, from: ConnectorEntity, to: ConnectorEntity) {

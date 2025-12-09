@@ -6,6 +6,7 @@ export enum NodeType {
   Switch = 4,
   FanIn = 5,
   FanOut = 6,
+  ModelCall = 7,
 }
 
 export function getNodeSymbol(nodeType: NodeType): string {
@@ -24,6 +25,8 @@ export function getNodeSymbol(nodeType: NodeType): string {
       return 'bi-pencil';
     case NodeType.Code:
       return 'bi-filetype-cs';
+    case NodeType.ModelCall:
+      return 'bi-chat-text';
     default:
       return '';
   }
