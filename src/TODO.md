@@ -3,8 +3,6 @@
 
 # Minimum Viable Product Features
 
-Scrolling on workflows, connectors, connector, models, model, status pages
-
 Model Call
 	- Find matching model provider and call it
 	- Resolve path strings in the instructions and prompt
