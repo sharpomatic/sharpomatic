@@ -3,6 +3,20 @@
   height: 100%;
 }
 
+.model-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.details {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .icon-sm {
   font-size: 1.5rem;
 }

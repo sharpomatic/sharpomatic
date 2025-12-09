@@ -3,8 +3,22 @@
   height: 100%;
 }
 
+.connection-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .icon-sm {
   font-size: 1.5rem;
+}
+
+.details {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .tiny {
@@ -21,5 +35,4 @@
   max-width: 500px;
   width: 500px;
 }
-
 

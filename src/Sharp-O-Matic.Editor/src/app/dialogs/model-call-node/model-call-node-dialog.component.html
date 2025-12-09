@@ -36,12 +36,12 @@
         @if (showTextFields) {
           <div class="mb-3">
             <label for="model-call-instructions" class="form-label">Instructions</label>
-            <textarea class="form-control" id="model-call-instructions" rows="4" [ngModel]="node.instructions()" (ngModelChange)="node.instructions.set($event)"></textarea>
+            <textarea class="form-control" id="model-call-instructions" rows="8" [ngModel]="node.instructions()" (ngModelChange)="node.instructions.set($event)"></textarea>
           </div>
 
           <div class="mb-3">
             <label for="model-call-prompt" class="form-label">Prompt</label>
-            <textarea class="form-control" id="model-call-prompt" rows="16" [ngModel]="node.prompt()" (ngModelChange)="node.prompt.set($event)"></textarea>
+            <textarea class="form-control" id="model-call-prompt" rows="24" [ngModel]="node.prompt()" (ngModelChange)="node.prompt.set($event)"></textarea>
           </div>
         }
       </div>

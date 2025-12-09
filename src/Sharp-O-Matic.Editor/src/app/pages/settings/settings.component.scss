@@ -4,6 +4,14 @@
   height: 100%;
 }
 
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .mat-toolbar.mat-primary {
   position: sticky;
   top: 0;
@@ -15,6 +23,10 @@
 }
 
 .details {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+
   .server {
     max-width: 700px;
   }
