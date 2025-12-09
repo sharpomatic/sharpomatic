@@ -1,7 +1,7 @@
 <div class="d-flex flex-column dialog-overlay bg-body-secondary">
   <div class="d-flex flex-column dialog-content">
     <div class="d-flex justify-content-between align-items-center p-3 pt-2 pb-1">
-      <h2 class=""><i class="bi bi-chat-text pe-3 icon-sm"></i>Model Call Node</h2>
+      <h2 class=""><i class="bi bi-chat-text pe-3 icon-sm"></i>{{ node.title() }}</h2>
       <button class="btn btn-primary" (click)="onClose()">Close</button>
     </div>
 
@@ -16,20 +16,34 @@
           <input type="text" class="form-control" id="model-call-title" [ngModel]="node.title()" (ngModelChange)="node.title.set($event)"/>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-3 short">
           <label for="model-call-model" class="form-label">Model</label>
-          <input type="text" class="form-control" id="model-call-model" [ngModel]="node.modelName()" (ngModelChange)="node.modelName.set($event)"/>
+          <select
+            id="model-call-model"
+            class="form-select"
+            [ngModel]="selectedModelId"
+            (ngModelChange)="onModelSelectionChange($event)"
+            [disabled]="!availableModels.length">
+            <option [ngValue]="null"></option>
+            @for (model of availableModels; track model.modelId) {
+              <option [ngValue]="model.modelId">
+                {{ model.name }}
+              </option>
+            }
+          </select>
         </div>
 
-        <div class="mb-3">
-          <label for="model-call-instructions" class="form-label">Instructions</label>
-          <textarea class="form-control" id="model-call-instructions" rows="3" [ngModel]="node.instructions()" (ngModelChange)="node.instructions.set($event)"></textarea>
-        </div>
+        @if (showTextFields) {
+          <div class="mb-3">
+            <label for="model-call-instructions" class="form-label">Instructions</label>
+            <textarea class="form-control" id="model-call-instructions" rows="4" [ngModel]="node.instructions()" (ngModelChange)="node.instructions.set($event)"></textarea>
+          </div>
 
-        <div class="mb-3">
-          <label for="model-call-prompt" class="form-label">Prompt</label>
-          <textarea class="form-control" id="model-call-prompt" rows="4" [ngModel]="node.prompt()" (ngModelChange)="node.prompt.set($event)"></textarea>
-        </div>
+          <div class="mb-3">
+            <label for="model-call-prompt" class="form-label">Prompt</label>
+            <textarea class="form-control" id="model-call-prompt" rows="16" [ngModel]="node.prompt()" (ngModelChange)="node.prompt.set($event)"></textarea>
+          </div>
+        }
       </div>
     </ng-template>
     <ng-template #inputsTab>
