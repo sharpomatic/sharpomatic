@@ -3,6 +3,8 @@
 
 # Minimum Viable Product Features
 
+Add custom display name to the capability names
+
 Scrolling on workflows, connectors, connector, models, model, status pages
 
 Model Call

@@ -4,11 +4,20 @@
   "Description": "Chat completion model.",
   "ConnectionConfigId": "openai",
   "IsCustom": false,
-  "Capabilities": {
-    "SupportsText": true,
-    "SupportsTemperature": true,
-    "SupportsTopP": true
-  },
+  "Capabilities": [
+    {
+      "Name": "SupportsText",
+      "DisplayName": "Supports Text"
+    },
+    {
+      "Name": "SupportsTemperature",
+      "DisplayName": "Supports temperature"
+    },
+    {
+      "Name": "SupportsTopP",
+      "DisplayName": "Supports top_p"
+    }
+  ],
   "ParameterFields": [
     {
       "Name": "temperature",
@@ -16,7 +25,7 @@
       "Description": "Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.",
       "Type": 5,
       "IsRequired": false,
-      "Capability": "supportsTemperature",
+      "Capability": "SupportsTemperature",
       "DefaultValue": 1,
       "Min": 0,
       "Max": 2,
@@ -28,7 +37,7 @@
       "Description": "Nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.",
       "Type": 5,
       "IsRequired": false,
-      "Capability": "supportsTopP",
+      "Capability": "SupportsTopP",
       "DefaultValue": 1,
       "Min": 0,
       "Max": 1,

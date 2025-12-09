@@ -7,7 +7,7 @@ public class ModelConfig
     public required string Description { get; set; }
     public required string ConnectionConfigId { get; set; }
     public required bool IsCustom { get; set; }
-    public required ModelCapabilities Capabilities { get; set; }
+    public required List<ModelCapability> Capabilities { get; set; }
     public required List<FieldDescriptor> ParameterFields { get; set; }
 }
 
