@@ -41,9 +41,6 @@ Build
 
 # Implementation Details
 
-Leaving unsaved page
-	Should ask user if they really want to leave
-
 Database
 	Add a version field to all serializable data, like workflow, connector, model, run, trace so easier to upgrade in future
 	Add indexes on fields that are part of ordering queries
