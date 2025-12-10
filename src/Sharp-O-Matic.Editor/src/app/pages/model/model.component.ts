@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, Signal, computed, effect, inject, signal } from '@angular/core';
+import { Component, HostListener, OnInit, Signal, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ConnectionSummary } from '../../metadata/definitions/connection summary';
@@ -11,6 +11,8 @@ import { FieldDescriptorType } from '../../metadata/enumerations/field-descripto
 import { MetadataService } from '../../services/metadata.service';
 import { ServerRepositoryService } from '../../services/server.repository.service';
 import { Connection } from '../../metadata/definitions/connection';
+import { CanLeaveWithUnsavedChanges } from '../../guards/unsaved-changes.guard';
+import { Observable, map } from 'rxjs';
 
 @Component({
   selector: 'app-model',
@@ -22,7 +24,7 @@ import { Connection } from '../../metadata/definitions/connection';
   templateUrl: './model.component.html',
   styleUrls: ['./model.component.scss'],
 })
-export class ModelComponent implements OnInit {
+export class ModelComponent implements OnInit, CanLeaveWithUnsavedChanges {
   private readonly route = inject(ActivatedRoute);
   private readonly serverRepository = inject(ServerRepositoryService);
   private readonly metadataService = inject(MetadataService);
@@ -114,10 +116,7 @@ export class ModelComponent implements OnInit {
   }
 
   save(): void {
-    this.serverRepository.upsertModel(this.model)
-      .subscribe(() => {
-        this.model?.markClean();
-    });
+    this.saveChanges().subscribe();
   }
 
   public onModelConfigChange(configId: string): void {
@@ -335,5 +334,27 @@ export class ModelComponent implements OnInit {
     this.serverRepository.getConnection(connectionId).subscribe((connection: Connection | null) => {
       this.connectionConfigId.set(connection?.configId() ?? null);
     });
+  }
+
+  hasUnsavedChanges(): boolean {
+    debugger;
+    return this.model.isDirty();
+  }
+
+  saveChanges(): Observable<void> {
+    return this.serverRepository.upsertModel(this.model).pipe(
+      map(() => {
+        this.model?.markClean();
+        return;
+      })
+    );
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges()) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
   }
 }

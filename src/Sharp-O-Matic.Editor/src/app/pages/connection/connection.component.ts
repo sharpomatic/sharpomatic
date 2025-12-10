@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Connection } from '../../metadata/definitions/connection';
 import { ConnectionConfig } from '../../metadata/definitions/connection-config';
@@ -8,6 +8,8 @@ import { FieldDescriptorType } from '../../metadata/enumerations/field-descripto
 import { ServerRepositoryService } from '../../services/server.repository.service';
 import { MetadataService } from '../../services/metadata.service';
 import { FormsModule } from '@angular/forms';
+import { CanLeaveWithUnsavedChanges } from '../../guards/unsaved-changes.guard';
+import { Observable, map } from 'rxjs';
 
 @Component({
   selector: 'app-connection',
@@ -19,7 +21,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './connection.component.html',
   styleUrls: ['./connection.component.scss'],
 })
-export class ConnectionComponent implements OnInit {
+export class ConnectionComponent implements OnInit, CanLeaveWithUnsavedChanges {
   private readonly route = inject(ActivatedRoute);
   private readonly serverRepository = inject(ServerRepositoryService);
   private readonly metadataService = inject(MetadataService);
@@ -42,10 +44,7 @@ export class ConnectionComponent implements OnInit {
   }
 
   save(): void {
-    this.serverRepository.upsertConnection(this.connection)
-      .subscribe(() => {
-        this.connection?.markClean();
-    });
+    this.saveChanges().subscribe();
   }
 
   public onConnectionConfigChange(configId: string): void {
@@ -239,5 +238,27 @@ export class ConnectionComponent implements OnInit {
     });
 
     this.connection.fieldValues.set(next);
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.connection.isDirty();
+  }
+
+  saveChanges(): Observable<void> {
+    return this.serverRepository.upsertConnection(this.connection)
+      .pipe(
+        map(() => {
+          this.connection?.markClean();
+          return;
+        })
+      );
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges()) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
   }
 }

@@ -6,6 +6,7 @@ import { API_URL } from './app.tokens';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { MonacoEditorModule } from 'ngx-monaco-editor-v2';
 import { MonacoService } from '../../services/monaco.service';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
 export function initializeMonacoService(monacoGlobalService: MonacoService) {
   return () => {
@@ -29,6 +30,7 @@ export const appConfig: ApplicationConfig = {
         },
       })
     ),
+    importProvidersFrom(ModalModule.forRoot()),
     {
       provide: APP_INITIALIZER,
       useFactory: (monacoService: MonacoService) => {

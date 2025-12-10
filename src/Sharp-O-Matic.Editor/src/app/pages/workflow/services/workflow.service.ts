@@ -6,7 +6,7 @@ import { TraceProgressModel } from '../interfaces/trace-progress-model';
 import { SignalrService } from '../../../services/signalr.service';
 import { RunStatus } from '../../../enumerations/run-status';
 import { NodeStatus } from '../../../enumerations/node-status';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { ContextEntryListEntity, ContextEntryListSnapshot } from '../../../entities/definitions/context-entry-list.entity';
 import { ContextEntryEntity, ContextEntrySnapshot } from '../../../entities/definitions/context-entry.entity';
 import { StartNodeEntity } from '../../../entities/definitions/start-node.entity';
@@ -87,10 +87,13 @@ export class WorkflowService implements OnDestroy  {
     });
   };
 
-  save(): void {
-    this.serverWorkflowService.upsertWorkflow(this.workflow()).subscribe(() => {
-      this.workflow().markClean();
-    });
+  save(): Observable<void> {
+    return this.serverWorkflowService.upsertWorkflow(this.workflow()).pipe(
+      map(() => {
+        this.workflow().markClean();
+        return;
+      })
+    );
   }
 
   run(): Observable<string | undefined> {

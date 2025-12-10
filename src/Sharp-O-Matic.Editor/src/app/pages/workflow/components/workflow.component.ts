@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, HostListener, TemplateRef, ViewChild, inject, OnInit, signal, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { WorkflowService } from '../services/workflow.service';
 import { DesignerComponent } from '../../../components/designer/components/designer.component';
@@ -10,6 +10,8 @@ import { BsModalService } from 'ngx-bootstrap/modal';
 import { TracebarComponent } from './tracebar.component';
 import { NodeType } from '../../../entities/enumerations/node-type';
 import { TabComponent, TabItem } from '../../../components/tab/tab.component';
+import { CanLeaveWithUnsavedChanges } from '../../../guards/unsaved-changes.guard';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-workflow',
@@ -24,7 +26,7 @@ import { TabComponent, TabItem } from '../../../components/tab/tab.component';
   templateUrl: './workflow.component.html',
   styleUrl: './workflow.component.scss'
 })
-export class WorkflowComponent implements OnInit {
+export class WorkflowComponent implements OnInit, CanLeaveWithUnsavedChanges {
   @ViewChild('designTab', { static: true }) designTab!: TemplateRef<unknown>;
   @ViewChild('detailsTab', { static: true }) detailsTab!: TemplateRef<unknown>;
 
@@ -53,7 +55,7 @@ export class WorkflowComponent implements OnInit {
   }
 
   save(): void {
-    this.workflowService.save();
+    this.saveChanges().subscribe();
   }
 
   run(): void {
@@ -82,5 +84,21 @@ export class WorkflowComponent implements OnInit {
 
   onTracebarWidthChange(width: number): void {
     this.tracebarWidth.set(width);
+  }
+
+  hasUnsavedChanges(): boolean {
+    return this.workflowService.workflow().isDirty() || this.workflowService.runInputs().isDirty();
+  }
+
+  saveChanges(): Observable<void> {
+    return this.workflowService.save();
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges()) {
+      event.preventDefault();
+      event.returnValue = '';
+    }
   }
 }
