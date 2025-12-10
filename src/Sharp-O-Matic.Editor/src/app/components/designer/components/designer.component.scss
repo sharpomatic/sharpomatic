@@ -49,15 +49,15 @@
   }
 
   &.running {
-    border-color: orange;
+    border-color: #FF8654;
   }
 
   &.success {
-    border-color: green;
+    border-color: #198754;
   }
 
   &.failed {
-    border-color: red;
+    border-color: #FF5454;
   }
 }
 

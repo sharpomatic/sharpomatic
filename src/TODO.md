@@ -19,6 +19,7 @@ Max nodes executed for a workflow to prevent looping forever
 Max execution time for workflow to prevent it running forever
 Max number of runs to keep for a workflow to prevent too much data storage
 
+Designer, right mouse down to drag surface, maybe zoom/unzoom
 
 # Integration Overrides
 

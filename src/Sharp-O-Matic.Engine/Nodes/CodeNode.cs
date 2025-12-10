@@ -1,5 +1,6 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
+[Node(NodeType.Code)]
 public class CodeNode(ThreadContext threadContext, CodeNodeEntity node) : RunNode<CodeNodeEntity>(threadContext, node)
 {
     protected override async Task<(string, List<NextNodeData>)> RunInternal()

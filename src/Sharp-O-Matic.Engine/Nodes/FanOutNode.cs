@@ -1,5 +1,6 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
+[Node(NodeType.FanOut)]
 public class FanOutNode(ThreadContext threadContext, FanOutNodeEntity node) : RunNode<FanOutNodeEntity>(threadContext, node)
 {
     protected override async Task<(string, List<NextNodeData>)> RunInternal()

@@ -1,5 +1,6 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
+[Node(NodeType.Switch)]
 public class SwitchNode(ThreadContext threadContext, SwitchNodeEntity node) : RunNode<SwitchNodeEntity>(threadContext, node)
 {
     protected override async Task<(string, List<NextNodeData>)> RunInternal()

@@ -1,6 +1,6 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
-public abstract class RunNode<T> where T : NodeEntity
+public abstract class RunNode<T> : IRunNode where T : NodeEntity
 {
     protected ThreadContext ThreadContext { get; set; }
     protected T Node { get; init; }

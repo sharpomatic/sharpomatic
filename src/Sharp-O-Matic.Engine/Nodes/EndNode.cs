@@ -1,5 +1,6 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
+[Node(NodeType.End)]
 public class EndNode(ThreadContext threadContext, EndNodeEntity node) : RunNode<EndNodeEntity>(threadContext, node)
 {
     protected override async Task<(string, List<NextNodeData>)> RunInternal()

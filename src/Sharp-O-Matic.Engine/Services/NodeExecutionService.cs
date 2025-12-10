@@ -2,7 +2,15 @@ namespace SharpOMatic.Engine.Services;
 
 public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFactory) : BackgroundService
 {
+    private static readonly Dictionary<NodeType, Type> _nodeRunners;
     private readonly SemaphoreSlim _semaphore = new(5);
+
+    static NodeExecutionService()
+    {
+        _nodeRunners = Assembly.GetExecutingAssembly().GetTypes()
+            .Where(t => t.GetCustomAttribute<NodeAttribute>() != null)
+            .ToDictionary(t => t.GetCustomAttribute<NodeAttribute>()!.NodeType, t => t);
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -98,8 +106,7 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
         {
             var repository = scope.ServiceProvider.GetRequiredService<IRepository>();
             var assembly = Assembly.GetExecutingAssembly();
-            var resourceNames = assembly.GetManifestResourceNames()
-                .Where(name => name.Contains(resourceFilter) && name.EndsWith(".json"));
+            var resourceNames = assembly.GetManifestResourceNames().Where(name => name.Contains(resourceFilter) && name.EndsWith(".json"));
 
             foreach (var resourceName in resourceNames)
             {
@@ -110,9 +117,7 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
                     {
                         var config = await JsonSerializer.DeserializeAsync<T>(stream);
                         if (config != null)
-                        {
                             await upsertAction(repository, config);
-                        }
                     }
                 }
                 catch (Exception ex)
@@ -125,17 +130,12 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
 
     private static Task<List<NextNodeData>> RunNode(ThreadContext threadContext, NodeEntity node)
     {
-        return node switch
+        if (_nodeRunners.TryGetValue(node.NodeType, out var runnerType))
         {
-            StartNodeEntity startNode => new StartNode(threadContext, startNode).Run(),
-            EndNodeEntity endNode => new EndNode(threadContext, endNode).Run(),
-            EditNodeEntity editNode => new EditNode(threadContext, editNode).Run(),
-            CodeNodeEntity codeNode => new CodeNode(threadContext, codeNode).Run(),
-            SwitchNodeEntity switchNode => new SwitchNode(threadContext, switchNode).Run(),
-            FanInNodeEntity fanInNode => new FanInNode(threadContext, fanInNode).Run(),
-            FanOutNodeEntity fanOutNode => new FanOutNode(threadContext, fanOutNode).Run(),
-            ModelCallNodeEntity modelCallNode => new ModelCallNode(threadContext, modelCallNode).Run(),
-            _ => throw new SharpOMaticException($"Unrecognized node type' {node.NodeType}'")
-        };
+            var runner = (IRunNode)Activator.CreateInstance(runnerType, threadContext, node)!;
+            return runner.Run();
+        }
+
+        throw new SharpOMaticException($"Unrecognized node type '{node.NodeType}'");
     }
 }
