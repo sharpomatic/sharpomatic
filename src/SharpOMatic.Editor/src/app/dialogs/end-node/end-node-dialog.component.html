@@ -34,6 +34,9 @@
               <label class="editPath">Input Path</label>
               <label class="editPath">Output Path</label>
             </div>
+            @if (!node.mappings().entries().length) {
+              <div class="text-muted fst-italic mb-2">(empty)</div>
+            }
             @for (entry of node.mappings().entries(); track entry.id) {
               <div class="d-flex align-items-start gap-2 mb-2">
                 <input type="text" class="form-control editPath" [ngModel]="entry.inputPath()" (ngModelChange)="entry.inputPath.set($event)"/>

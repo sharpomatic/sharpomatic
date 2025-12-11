@@ -25,6 +25,9 @@
             <label class="editType">Type</label>
             <label class="editValue">Value</label>
           </div>
+          @if (!hasUpsertEntries()) {
+            <div class="text-muted fst-italic mb-2">(empty)</div>
+          }
           @for (entry of node.edits().entries(); track entry.id) {
             @if (entry.purpose() === contextEntryPurpose.Upsert) {
             <div class="d-flex align-items-start gap-2 mb-2">
@@ -101,6 +104,9 @@
           <div class="d-flex align-items-start gap-2 mb-2">
             <label class="editPath">Path</label>
           </div>
+          @if (!hasDeleteEntries()) {
+            <div class="text-muted fst-italic mb-2">(empty)</div>
+          }
           @for (entry of node.edits().entries(); track entry.id) {
             @if (entry.purpose() === contextEntryPurpose.Delete) {
             <div class="d-flex align-items-start gap-2 mb-2">

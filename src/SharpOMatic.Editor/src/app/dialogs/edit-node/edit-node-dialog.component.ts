@@ -112,6 +112,14 @@ export class EditNodeDialogComponent implements OnInit {
     this.close.emit();
   }
 
+  hasUpsertEntries(): boolean {
+    return this.node.edits().entries().some(entry => entry.purpose() === ContextEntryPurpose.Upsert);
+  }
+
+  hasDeleteEntries(): boolean {
+    return this.node.edits().entries().some(entry => entry.purpose() === ContextEntryPurpose.Delete);
+  }
+
   private hasSiblingEntry(entry: ContextEntryEntity, step: number): boolean {
     const entries = this.node.edits().entries();
     const index = entries.findIndex(e => e.id === entry.id);

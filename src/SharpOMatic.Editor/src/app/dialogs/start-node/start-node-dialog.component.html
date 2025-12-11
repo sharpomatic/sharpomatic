@@ -38,6 +38,9 @@
               <label class="editType">Type</label>
               <label class="editValue">Default Value</label>            
             </div>
+            @if (!node.initializing().entries().length) {
+              <div class="text-muted fst-italic mb-2">(empty)</div>
+            }
             @for (entry of node.initializing().entries(); track entry.id) {
               <div class="d-flex align-items-start gap-2 mb-2">
                 <input type="text" class="form-control editPath" [ngModel]="entry.inputPath()" (ngModelChange)="entry.inputPath.set($event)"/>
