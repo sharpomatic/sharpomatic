@@ -21,18 +21,48 @@
   overflow-y: auto;
 }
 
+.form-line {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.field-label {
+  width: 150px;
+  flex: 0 0 150px;
+  margin-bottom: 0;
+  text-align: right;
+}
+
+.control-column {
+  flex: 1;
+}
+
+.control-column .form-control,
+.control-column .form-select {
+  width: 100%;
+}
+
+.form-line .form-check {
+  padding-left: 0;
+}
+
+.form-line .form-check-input {
+  margin-left: 0;
+}
+
 .tiny {
   max-width: 200px;
-  width: 200px;
+  width: 100%;
 }
 
 .short {
   max-width: 350px;
-  width: 350px;
+  width: 100%;
 }
 
 .long {
   max-width: 500px;
-  width: 500px;
+  width: 100%;
 }
-

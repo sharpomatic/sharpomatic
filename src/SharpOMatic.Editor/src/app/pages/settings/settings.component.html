@@ -4,14 +4,16 @@
   </div>
   <hr class="m-0"/>
   <div class="p-3 details">
-    <div class="mb-3 server">
-      <label for="server-url" class="form-label">Server</label>
-      <input type="text"
-             class="form-control"
-             id="server-url"
-             [(ngModel)]="apiUrlValue"
-             (ngModelChange)="onApiUrlChange($event)"
-             placeholder="API base URL"/>
+    <div class="mb-3 server form-line">
+      <label for="server-url" class="form-label field-label">Server</label>
+      <div class="flex-fill control-column">
+        <input type="text"
+               class="form-control w-100"
+               id="server-url"
+               [(ngModel)]="apiUrlValue"
+               (ngModelChange)="onApiUrlChange($event)"
+               placeholder="API base URL"/>
+      </div>
     </div>
   </div>
 </div>

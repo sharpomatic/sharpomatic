@@ -8,126 +8,139 @@
   <hr class="m-0"/>
 
   <div class="p-3 details bg-body-tertiary">
-    <div class="mb-3 short">
-      <label for="model-connection" class="form-label">Connection</label>
-      <select
-        id="model-connection"
-        class="form-select"
-        [ngModel]="model.connectionId()"
-        (ngModelChange)="model.connectionId.set($event)"
-        [disabled]="!connectionSummaries.length">
-        <option [ngValue]="null">(None)</option>
-        @for(connection of connectionSummaries; track connection.connectionId) {
-          <option [ngValue]="connection.connectionId">
-            {{ connection.name }}
-          </option>
-        }
-      </select>
-    </div>
-
-    @if (model.connectionId()) {
-      <div class="mb-3 short">
-        <label for="model-type" class="form-label">Model</label>
+    <div class="mb-3 form-line">
+      <label for="model-connection" class="form-label field-label">Connection</label>
+      <div class="flex-fill control-column short">
         <select
-          id="model-type"
-          class="form-select"
-          [ngModel]="model.configId()"
-          (ngModelChange)="onModelConfigChange($event)"
-          [disabled]="!availableModelConfigs().length">
-          @for(config of availableModelConfigs(); track config.configId) {
-            <option [ngValue]="config.configId">
-              {{ config.displayName }}
+          id="model-connection"
+          class="form-select w-100"
+          [ngModel]="model.connectionId()"
+          (ngModelChange)="model.connectionId.set($event)"
+          [disabled]="!connectionSummaries.length">
+          <option [ngValue]="null">(None)</option>
+          @for(connection of connectionSummaries; track connection.connectionId) {
+            <option [ngValue]="connection.connectionId">
+              {{ connection.name }}
             </option>
           }
         </select>
       </div>
+    </div>
+
+    @if (model.connectionId()) {
+      <div class="mb-3 form-line">
+        <label for="model-type" class="form-label field-label">Model</label>
+        <div class="flex-fill control-column short">
+          <select
+            id="model-type"
+            class="form-select w-100"
+            [ngModel]="model.configId()"
+            (ngModelChange)="onModelConfigChange($event)"
+            [disabled]="!availableModelConfigs().length">
+            @for(config of availableModelConfigs(); track config.configId) {
+              <option [ngValue]="config.configId">
+                {{ config.displayName }}
+              </option>
+            }
+          </select>
+        </div>
+      </div>
 
       @if (modelConfig) {
-        <div class="mb-3 short">
-          <label for="model-name" class="form-label">Name</label>
-          <input type="text" class="form-control" id="model-name" [ngModel]="model.name()"
-              (ngModelChange)="model.name.set($event)" />
+        <div class="mb-3 form-line">
+          <label for="model-name" class="form-label field-label">Name</label>
+          <div class="flex-fill control-column short">
+            <input type="text" class="form-control w-100" id="model-name" [ngModel]="model.name()"
+                (ngModelChange)="model.name.set($event)" />
+          </div>
         </div>
 
-        <div class="mb-3 long">
-          <label for="model-description" class="form-label">Description</label>
-          <input type="text" class="form-control" id="model-description" [ngModel]="model.description()"
-              (ngModelChange)="model.description.set($event)" />
+        <div class="mb-3 form-line">
+          <label for="model-description" class="form-label field-label">Description</label>
+          <div class="flex-fill control-column long">
+            <input type="text" class="form-control w-100" id="model-description" [ngModel]="model.description()"
+                (ngModelChange)="model.description.set($event)" />
+          </div>
         </div>
 
       @if (modelConfig.isCustom) {
-        <div class="mb-3 long">
-          <label class="form-label">Capabilities</label>
-          @for (cap of capabilityEntries(); track cap.capability.name) {
-            <div class="form-check">
-              <input
-                class="form-check-input"
-                type="checkbox"
-                [id]="'cap-' + cap.capability.name"
-                [checked]="cap.selected"
-                (change)="onCapabilityChange(cap.capability.name, $any($event.target).checked)">
-              <label class="form-check-label" [for]="'cap-' + cap.capability.name">
-                {{ cap.capability.displayName }}
-              </label>
-            </div>
-          }
+        <div class="mb-3 form-line">
+          <label class="form-label field-label">Capabilities</label>
+          <div class="flex-fill control-column long">
+            @for (cap of capabilityEntries(); track cap.capability.name) {
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [id]="'cap-' + cap.capability.name"
+                  [checked]="cap.selected"
+                  (change)="onCapabilityChange(cap.capability.name, $any($event.target).checked)">
+                <label class="form-check-label" [for]="'cap-' + cap.capability.name">
+                  {{ cap.capability.displayName }}
+                </label>
+              </div>
+            }
+          </div>
         </div>
       }
 
       @for (field of modelConfig.parameterFields; track field.name) {
         @if (!field.capability || (isCapabilityEnabled(field.capability) && (!modelConfig.isCustom || isCustomCapabilityEnabled(field.capability)))) {
-          <div class="mb-3" [ngClass]="{
-            'long': field.type !== fieldDescriptorType.Integer && field.type !== fieldDescriptorType.Double,
-            'tiny': field.type === fieldDescriptorType.Integer || field.type === fieldDescriptorType.Double
-            }">
+          <div class="mb-3 form-line">
               @if (field.type === fieldDescriptorType.String || field.type === fieldDescriptorType.Secret) {
-                <label class="form-label">{{ field.label }}</label>
-                <input
-                  [type]="field.type === fieldDescriptorType.Secret ? 'password' : 'text'"
-                  class="form-control"
-                  [class.is-invalid]="isFieldMissing(field)"
-                  [ngModel]="getParameterValue(field)"
-                  (ngModelChange)="onParameterValueChange(field, $event)"
-                  (blur)="onParameterStringBlur(field, $any($event.target).value)"/>
-                <div class="invalid-feedback">This field is required.</div>
+                <label class="form-label field-label">{{ field.label }}</label>
+                <div class="flex-fill control-column long">
+                  <input
+                    [type]="field.type === fieldDescriptorType.Secret ? 'password' : 'text'"
+                    class="form-control w-100"
+                    [class.is-invalid]="isFieldMissing(field)"
+                    [ngModel]="getParameterValue(field)"
+                    (ngModelChange)="onParameterValueChange(field, $event)"
+                    (blur)="onParameterStringBlur(field, $any($event.target).value)"/>
+                  <div class="invalid-feedback">This field is required.</div>
+                </div>
               }
 
               @if (field.type === fieldDescriptorType.Boolean) {
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="checkbox"
-                    [checked]="getParameterBooleanValue(field)"
-                    (change)="onParameterBooleanChange(field, $any($event.target).checked)">
-                  <label class="form-check-label">
-                    {{ field.label }}
-                  </label>
+                <label class="form-label field-label">{{ field.label }}</label>
+                <div class="flex-fill control-column long">
+                  <div class="form-check mb-0">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      [checked]="getParameterBooleanValue(field)"
+                      (change)="onParameterBooleanChange(field, $any($event.target).checked)">
+                  </div>
                 </div>
               }
 
               @if (field.type === fieldDescriptorType.Enum) {
-                <label class="form-label">{{ field.label }}</label>
-                <select
-                  class="form-select"
-                  [ngModel]="getParameterValue(field)"
-                  (ngModelChange)="onParameterValueChange(field, $event)">
-                  @for(option of field.enumOptions; track option) {
-                    <option [ngValue]="option">{{ option }}</option>
-                  }
-                </select>
+                <label class="form-label field-label">{{ field.label }}</label>
+                <div class="flex-fill control-column short">
+                  <select
+                    class="form-select w-100"
+                    [ngModel]="getParameterValue(field)"
+                    (ngModelChange)="onParameterValueChange(field, $event)">
+                    @for(option of field.enumOptions; track option) {
+                      <option [ngValue]="option">{{ option }}</option>
+                    }
+                  </select>
+                </div>
               }
 
               @if (field.type === fieldDescriptorType.Integer || field.type === fieldDescriptorType.Double) {
-                <label class="form-label">{{ field.label }}</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  [class.is-invalid]="isFieldMissing(field)"
-                  [attr.step]="field.step ?? (field.type === fieldDescriptorType.Integer ? 1 : 'any')"
-                  [ngModel]="getParameterNumericValue(field)"
-                  (ngModelChange)="onParameterNumericChange(field, $event)"
-                  (blur)="onParameterNumericBlur(field, $any($event.target).value)"/>
-                <div class="invalid-feedback">This field is required.</div>
+                <label class="form-label field-label">{{ field.label }}</label>
+                <div class="flex-fill control-column tiny">
+                  <input
+                    type="number"
+                    class="form-control w-100"
+                    [class.is-invalid]="isFieldMissing(field)"
+                    [attr.step]="field.step ?? (field.type === fieldDescriptorType.Integer ? 1 : 'any')"
+                    [ngModel]="getParameterNumericValue(field)"
+                    (ngModelChange)="onParameterNumericChange(field, $event)"
+                    (blur)="onParameterNumericBlur(field, $any($event.target).value)"/>
+                  <div class="invalid-feedback">This field is required.</div>
+                </div>
               }
             </div>
         }
