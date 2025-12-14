@@ -1,7 +1,7 @@
 {
-  "ConfigId": "openai_gpt-5.2-chat-latest",
-  "DisplayName": "gpt-5.2-chat-latest",
-  "Description": "Chat completion model.",
+  "ConfigId": "openai_gpt-5.2",
+  "DisplayName": "gpt-5.2",
+  "Description": "Reasoning model.",
   "ConnectorConfigId": "openai",
   "IsCustom": false,
   "Capabilities": [
@@ -22,10 +22,10 @@
       "Type": 5,
       "IsRequired": false,
       "Capability": "SupportsMaxOutputTokens",
-      "DefaultValue": 16384,
+      "DefaultValue": 128000,
       "Min": 0,
-      "Max": 16384,
-      "Step": 1000
+      "Max": 128000,
+      "Step": 10000
     }
   ]
 }

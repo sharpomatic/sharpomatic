@@ -10,6 +10,8 @@
     <EmbeddedResource Include="Metadata\Resources\ConnectorConfig\azureopenai.json" />
     <EmbeddedResource Include="Metadata\Resources\ConnectorConfig\openai.json" />
     <EmbeddedResource Include="Metadata\Resources\ModelConfig\openai_custom.json" />
+    <EmbeddedResource Include="Metadata\Resources\ModelConfig\openai_gpt-5.2-pro.json" />
+    <EmbeddedResource Include="Metadata\Resources\ModelConfig\openai_gpt-5.2.json" />
     <EmbeddedResource Include="Metadata\Resources\ModelConfig\openai_gpt-5.2-chat-latest.json" />
   </ItemGroup>
 

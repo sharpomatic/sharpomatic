@@ -3,6 +3,8 @@
 
 # Minimum Viable Product Features
 
+Read only properties of mode, like context window, knowledge cutoff, pricing.
+
 Model Call
 	- Find matching model provider and call it
 	- Resolve path strings in the instructions and prompt

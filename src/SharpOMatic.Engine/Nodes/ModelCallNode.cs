@@ -51,11 +51,20 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
         else
             modelName = modelConfig.DisplayName;
 
+        var chatOptions = new ChatOptions();
+
+        if (modelConfig.Capabilities.Any(c => c.Name == "SupportsMaxOutputTokens") &&
+            model.ParameterValues.TryGetValue("max_output_tokens", out var paramMaxOutputTokens) &&
+            int.TryParse(paramMaxOutputTokens, out var maxOutputTokens))
+        {
+            chatOptions.MaxOutputTokens = maxOutputTokens;
+        }
+
         OpenAIClient client = new OpenAIClient(apiKey);
         var chatCompletionClient = client.GetChatClient(modelName);
 
         AIAgent agent = chatCompletionClient.CreateAIAgent(instructions: Node.Instructions);
-        var response = await agent.RunAsync(Node.Prompt);
+        var response = await agent.RunAsync(Node.Prompt, options: new ChatClientAgentRunOptions(chatOptions));
         ThreadContext.NodeContext.Set("output.text", response.Text);
 
         return ("Model call executed", new List<NextNodeData> { new(ThreadContext, RunContext.ResolveSingleOutput(Node)) });
