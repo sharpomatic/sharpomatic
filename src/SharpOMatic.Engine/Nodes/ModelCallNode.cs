@@ -68,7 +68,10 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
 
         AIAgent agent = chatCompletionClient.CreateAIAgent(instructions: instructions);
         var response = await agent.RunAsync(prompt, options: new ChatClientAgentRunOptions(chatOptions));
-        ThreadContext.NodeContext.Set("output.text", response.Text);
+        
+        var tempContext = new ContextObject();
+        tempContext.Set("output.text", response.Text);
+        ThreadContext.RunContext.MergeContexts(ThreadContext.NodeContext, tempContext);
 
         return ("Model call executed", new List<NextNodeData> { new(ThreadContext, RunContext.ResolveSingleOutput(Node)) });
     }

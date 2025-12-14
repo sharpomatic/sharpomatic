@@ -4,9 +4,6 @@
 # Minimum Viable Product Features
 
 
-Model
-	-Read only properties of mode, like context window, knowledge cutoff, pricing.
-
 Model Call
 	- Define output paths with defaults
 	- Support tool calling, reuse existing attributes etc?
