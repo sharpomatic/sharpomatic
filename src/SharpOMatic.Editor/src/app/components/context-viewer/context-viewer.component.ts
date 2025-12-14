@@ -107,6 +107,7 @@ export class ContextViewerComponent implements OnChanges {
     const payloadObject = this.getPayloadObject(payload);
     const isContextObject = payloadObject.$type === CONTEXT_OBJECT;
     const isContextList = payloadObject.$type === CONTEXT_LIST;
+    const isArray = Array.isArray(payloadObject.value);
 
     if (isContextObject && this.isPlainObject(payloadObject.value)) {
       const children = this.buildNodesFromObject(payloadObject.value as Record<string, unknown>);
@@ -119,12 +120,12 @@ export class ContextViewerComponent implements OnChanges {
       };
     }
 
-    if (isContextList && Array.isArray(payloadObject.value)) {
-      const children = (payloadObject.value as unknown[]).map((item, index) =>
-        this.toContextNode(`[${index}]`, item)
-      );
+    if (isContextList && isArray) {
+      const arrayValue = payloadObject.value as unknown[];
+      const children = arrayValue.map((item, index) => this.toContextNode(`[${index}]`, item));
+      const nameWithLength = `${name}[${arrayValue.length}]`;
       return {
-        name,
+        name: nameWithLength,
         type: this.getPayloadType(payloadObject),
         displayValue: '',
         children,
