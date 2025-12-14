@@ -5,7 +5,6 @@
 
 
 Model Call
-	- Define output paths with defaults
 	- Support tool calling, reuse existing attributes etc?
 	- Support structured output
 

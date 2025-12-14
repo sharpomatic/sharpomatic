@@ -38,6 +38,18 @@
         </div>
 
         @if (showTextFields) {
+          <div class="mb-3 short form-line">
+            <label for="model-call-text-output" class="form-label field-label">Text Output Path</label>
+            <div class="flex-fill control-column">
+              <input
+                type="text"
+                class="form-control w-100"
+                id="model-call-text-output"
+                [ngModel]="node.textOutputPath()"
+                (ngModelChange)="node.textOutputPath.set($event)" />
+            </div>
+          </div>
+
           <div class="mb-3 long form-line align-top">
             <label for="model-call-instructions" class="form-label field-label">Instructions</label>
             <div class="flex-fill control-column">

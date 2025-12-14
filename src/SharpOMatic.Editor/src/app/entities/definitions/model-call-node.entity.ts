@@ -7,19 +7,25 @@ export interface ModelCallNodeSnapshot extends NodeSnapshot {
   modelId: string;
   instructions: string;
   prompt: string;
+  textOutputPath: string;
+  imageOutputPath: string;
 }
 
 export class ModelCallNodeEntity extends NodeEntity<ModelCallNodeSnapshot> {
   public modelId: WritableSignal<string>;
   public instructions: WritableSignal<string>;
   public prompt: WritableSignal<string>;
+  public textOutputPath: WritableSignal<string>;
+  public imageOutputPath: WritableSignal<string>;
 
   constructor(snapshot: ModelCallNodeSnapshot) {
     super(snapshot);
 
-    this.modelId = signal(snapshot.modelId);
-    this.instructions = signal(snapshot.instructions);
-    this.prompt = signal(snapshot.prompt);
+    this.modelId = signal(snapshot.modelId ?? '');
+    this.instructions = signal(snapshot.instructions ?? '');
+    this.prompt = signal(snapshot.prompt ?? '');
+    this.textOutputPath = signal(snapshot.textOutputPath ?? '');
+    this.imageOutputPath = signal(snapshot.imageOutputPath ?? '');
 
     const baseIsDirty = this.isDirty;
     this.isDirty = computed(() => {
@@ -30,11 +36,15 @@ export class ModelCallNodeEntity extends NodeEntity<ModelCallNodeSnapshot> {
       const currentModelId = this.modelId();
       const currentInstructions = this.instructions();
       const currentPrompt = this.prompt();
+      const currentTextOutputPath = this.textOutputPath();
+      const currentImageOutputPath = this.imageOutputPath();
 
       return currentIsDirty ||
         currentModelId !== snapshot.modelId ||
         currentInstructions !== snapshot.instructions ||
-        currentPrompt !== snapshot.prompt;
+        currentPrompt !== snapshot.prompt ||
+        currentTextOutputPath !== snapshot.textOutputPath ||
+        currentImageOutputPath !== snapshot.imageOutputPath;
     });
   }
 
@@ -44,6 +54,8 @@ export class ModelCallNodeEntity extends NodeEntity<ModelCallNodeSnapshot> {
       modelId: this.modelId(),
       instructions: this.instructions(),
       prompt: this.prompt(),
+      textOutputPath: this.textOutputPath(),
+      imageOutputPath: this.imageOutputPath(),
     };
   }
 
@@ -61,6 +73,8 @@ export class ModelCallNodeEntity extends NodeEntity<ModelCallNodeSnapshot> {
       modelId: '',
       instructions: '',
       prompt: '',
+      textOutputPath: 'output.text',
+      imageOutputPath: 'output.image',
     };
   }
 
