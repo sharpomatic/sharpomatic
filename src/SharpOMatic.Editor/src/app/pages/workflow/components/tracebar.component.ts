@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild, computed, inject } from '@angular/core';
 import { NodeStatus } from '../../../enumerations/node-status';
 import { RunStatus } from '../../../enumerations/run-status';
 import { WorkflowService } from '../services/workflow.service';
@@ -35,6 +35,10 @@ export class TracebarComponent implements OnInit, OnDestroy {
   public tabs: TabItem[] = [];
   @Input() public activeTabId = 'input';
   @Output() public activeTabIdChange = new EventEmitter<string>();
+  public readonly outputContexts = computed(() => {
+    const output = this.workflowService.runProgress()?.outputContext;
+    return output ? [output] : [];
+  });
 
   private minWidth = 500;
   private maxWidth = 1200;
@@ -99,14 +103,6 @@ export class TracebarComponent implements OnInit, OnDestroy {
   public onActiveTabIdChange(tabId: string): void {
     this.activeTabId = tabId;
     this.activeTabIdChange.emit(tabId);
-  }
-
-  public getOutputContexts(): string[] {
-    const output = this.workflowService.runProgress()?.outputContext;
-    if (!output) {
-      return [];
-    }
-    return [output];
   }
 
   public startResize(event: MouseEvent | TouchEvent): void {
