@@ -12,26 +12,16 @@
         {
           "Name": "apikey",
           "Label": "API key",
-          "Description": "OpenAI API Key",
           "Type": 1,
           "IsRequired": true,
-          "DefaultValue": ""
         },
         {
           "Name": "organizationid",
-          "Label": "Organization Id",
-          "Description": "Optional Organization Id",
-          "Type": 0,
-          "IsRequired": false,
-          "DefaultValue": ""
+          "Label": "Organization Id"
         },
         {
           "Name": "projectId",
-          "Label": "Project Id",
-          "Description": "Optional Project Id",
-          "Type": 0,
-          "IsRequired": false,
-          "DefaultValue": ""
+          "Label": "Project Id"
         }
       ]
     }

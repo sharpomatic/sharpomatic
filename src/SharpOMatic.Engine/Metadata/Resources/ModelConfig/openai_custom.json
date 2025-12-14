@@ -10,28 +10,36 @@
       "DisplayName": "Supports Text"
     },
     {
+      "Name": "SupportsMaxOutputTokens",
+      "DisplayName": "Supports Max Output Tokens"
+    },
+    {
       "Name": "SupportsTemperature",
-      "DisplayName": "Supports temperature"
+      "DisplayName": "Supports Temperature"
     },
     {
       "Name": "SupportsTopP",
-      "DisplayName": "Supports top_p"
+      "DisplayName": "Supports TopP"
     }
   ],
   "ParameterFields": [
     {
       "Name": "modelName",
       "Label": "Model Name",
-      "Description": "Custom model name.",
-      "Type": 0,
       "IsRequired": true
     },
     {
+      "Name": "max_output_tokens",
+      "Label": "Max Output Tokens",
+      "Type": 5,
+      "Capability": "SupportsMaxOutputTokens",
+      "DefaultValue": 128000,
+      "Min": 0
+    }
+    {
       "Name": "temperature",
       "Label": "temperature",
-      "Description": "Zero to 2.",
       "Type": 5,
-      "IsRequired": false,
       "Capability": "SupportsTemperature",
       "DefaultValue": 1,
       "Min": 0,
@@ -41,22 +49,12 @@
     {
       "Name": "top_p",
       "Label": "top_p",
-      "Description": "Zero to 1",
       "Type": 5,
-      "IsRequired": false,
       "Capability": "SupportsTopP",
       "DefaultValue": 1,
       "Min": 0,
       "Max": 1,
       "Step": 0.1
-    },
-    {
-      "Name": "random",
-      "Label": "random",
-      "Description": "Test",
-      "Type": 0,
-      "IsRequired": false,
-      "Capability": "SupportsText"
     }
   ]
 }

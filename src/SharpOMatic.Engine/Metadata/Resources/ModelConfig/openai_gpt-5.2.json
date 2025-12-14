@@ -3,7 +3,6 @@
   "DisplayName": "gpt-5.2",
   "Description": "Reasoning model.",
   "ConnectorConfigId": "openai",
-  "IsCustom": false,
   "Capabilities": [
     {
       "Name": "SupportsText",
@@ -18,9 +17,7 @@
     {
       "Name": "max_output_tokens",
       "Label": "Max Output Tokens",
-      "Description": "",
       "Type": 5,
-      "IsRequired": false,
       "Capability": "SupportsMaxOutputTokens",
       "DefaultValue": 128000,
       "Min": 0,

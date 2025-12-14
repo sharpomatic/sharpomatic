@@ -4,6 +4,7 @@ export interface FieldDescriptorSnapshot {
   name: string;
   label: string;
   description: string;
+  callDefined: boolean;
   type: FieldDescriptorType;
   isRequired: boolean;
   capability: string | null;
@@ -19,6 +20,7 @@ export class FieldDescriptor {
     public readonly name: string,
     public readonly label: string,
     public readonly description: string,
+    public readonly callDefined: boolean,
     public readonly type: FieldDescriptorType,
     public readonly isRequired: boolean,
     public readonly capability: string | null,
@@ -34,6 +36,7 @@ export class FieldDescriptor {
       snapshot.name,
       snapshot.label,
       snapshot.description,
+      snapshot.callDefined,
       snapshot.type,
       snapshot.isRequired,
       snapshot.capability,

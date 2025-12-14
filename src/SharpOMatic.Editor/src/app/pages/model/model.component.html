@@ -85,7 +85,7 @@
       }
 
       @for (field of modelConfig.parameterFields; track field.name) {
-        @if (!field.capability || (isCapabilityEnabled(field.capability) && (!modelConfig.isCustom || isCustomCapabilityEnabled(field.capability)))) {
+        @if (!field.callDefined && (!field.capability || (isCapabilityEnabled(field.capability) && (!modelConfig.isCustom || isCustomCapabilityEnabled(field.capability))))) {
           <div class="mb-3 form-line">
               @if (field.type === fieldDescriptorType.String || field.type === fieldDescriptorType.Secret) {
                 <label class="form-label field-label">{{ field.label }}</label>
