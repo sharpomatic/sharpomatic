@@ -26,6 +26,7 @@ export class DynamicFieldsComponent {
   @Input() values: Record<string, string | null> = {};
   @Input() capabilityContext: DynamicFieldsCapabilityContext | null = null;
   @Input() allowedCapabilities: string[] | null = null;
+  @Input() ignoredCapabilities: string[] | null = null;
   @Input() includeCallDefined = true;
   @Input() includeNonCallDefined = true;
   @Input() disabled = false;
@@ -46,6 +47,12 @@ export class DynamicFieldsComponent {
 
     if (this.allowedCapabilities && this.allowedCapabilities.length) {
       if (!field.capability || !this.allowedCapabilities.includes(field.capability)) {
+        return false;
+      }
+    }
+
+    if (this.ignoredCapabilities && this.ignoredCapabilities.length) {
+      if (field.capability && this.ignoredCapabilities.includes(field.capability)) {
         return false;
       }
     }

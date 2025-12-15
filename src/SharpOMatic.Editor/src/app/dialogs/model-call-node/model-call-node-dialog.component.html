@@ -69,7 +69,21 @@
           [fields]="modelConfig?.parameterFields ?? []"
           [values]="node.parameterValues()"
           [capabilityContext]="capabilityContext"
+          [ignoredCapabilities]="['SupportsStructuredOutput']"
           [includeNonCallDefined]="false"
+          (valuesChange)="onParameterValuesChange($event)">
+        </app-dynamic-fields>
+      </div>
+    </ng-template>
+    <ng-template #structuredTab>
+      <div class="bg-body-tertiary p-3">
+        <app-dynamic-fields
+          [fields]="modelConfig?.parameterFields ?? []"
+          [values]="node.parameterValues()"
+          [capabilityContext]="capabilityContext"
+          [includeCallDefined]="true"
+          [includeNonCallDefined]="false"
+          [allowedCapabilities]="['SupportsStructuredOutput']"
           (valuesChange)="onParameterValuesChange($event)">
         </app-dynamic-fields>
       </div>

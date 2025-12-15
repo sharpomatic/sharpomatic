@@ -32,6 +32,7 @@ export class ModelCallNodeDialogComponent implements OnInit {
   @ViewChild('detailsTab', { static: true }) detailsTab!: TemplateRef<unknown>;
   @ViewChild('inputsTab', { static: true }) inputsTab!: TemplateRef<unknown>;
   @ViewChild('outputsTab', { static: true }) outputsTab!: TemplateRef<unknown>;
+  @ViewChild('structuredTab', { static: true }) structuredTab!: TemplateRef<unknown>;
 
   public node: ModelCallNodeEntity;
   public inputTraces: string[];
@@ -66,12 +67,7 @@ export class ModelCallNodeDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.tabs = [
-      { id: 'details', title: 'Details', content: this.detailsTab },
-      { id: 'inputs', title: 'Inputs', content: this.inputsTab },
-      { id: 'outputs', title: 'Outputs', content: this.outputsTab },
-    ];
-
+    this.refreshTabs();
     this.loadAvailableModels();
   }
 
@@ -117,6 +113,7 @@ export class ModelCallNodeDialogComponent implements OnInit {
     this.modelConfig = null;
     this.showTextFields = false;
     this.node.modelId.set('');
+    this.refreshTabs();
   }
 
   private loadModel(modelId: string): void {
@@ -125,6 +122,7 @@ export class ModelCallNodeDialogComponent implements OnInit {
       this.showTextFields = false;
 
       if (!model) {
+        this.refreshTabs();
         return;
       }
 
@@ -138,6 +136,7 @@ export class ModelCallNodeDialogComponent implements OnInit {
       this.modelConfig = configs.find(config => config.configId === configId) ?? null;
       this.updateTextFieldVisibility();
       this.syncCallParameterValues();
+      this.refreshTabs();
     };
 
     if (this.modelConfigsCache.length) {
@@ -256,5 +255,42 @@ export class ModelCallNodeDialogComponent implements OnInit {
     }
 
     return numeric.toString();
+  }
+
+  public get supportsStructuredOutput(): boolean {
+    if (!this.modelConfig) {
+      return false;
+    }
+
+    const capabilityName = 'SupportsStructuredOutput';
+    const hasCapability = this.modelConfig.capabilities.some(c => c.name === capabilityName);
+    if (!hasCapability) {
+      return false;
+    }
+
+    if (!this.modelConfig.isCustom) {
+      return true;
+    }
+
+    return this.loadedModel?.customCapabilities().has(capabilityName) ?? false;
+  }
+
+  private refreshTabs(): void {
+    const newTabs: TabItem[] = [
+      { id: 'details', title: 'Details', content: this.detailsTab },
+      { id: 'inputs', title: 'Inputs', content: this.inputsTab },
+      { id: 'outputs', title: 'Outputs', content: this.outputsTab },
+    ];
+
+    if (this.supportsStructuredOutput) {
+      newTabs.splice(1, 0, { id: 'structured', title: 'Structured Output', content: this.structuredTab });
+    }
+
+    this.tabs = newTabs;
+
+    const hasActive = newTabs.some(t => t.id === this.activeTabId);
+    if (!hasActive) {
+      this.activeTabId = 'details';
+    }
   }
 }
