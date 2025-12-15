@@ -65,67 +65,13 @@
           </div>
         }
 
-        @for (field of getCallParameterFields(); track field.name) {
-          @if (shouldShowField(field)) {
-            <div class="mb-3 form-line">
-              @if (field.type === fieldDescriptorType.String || field.type === fieldDescriptorType.Secret) {
-                <label class="form-label field-label">{{ field.label }}</label>
-                <div class="flex-fill control-column long">
-                  <input
-                    [type]="field.type === fieldDescriptorType.Secret ? 'password' : 'text'"
-                    class="form-control w-100"
-                    [class.is-invalid]="isFieldMissing(field)"
-                    [ngModel]="getParameterValue(field)"
-                    (ngModelChange)="onParameterValueChange(field, $event)"
-                    (blur)="onParameterStringBlur(field, $any($event.target).value)"/>
-                  <div class="invalid-feedback">This field is required.</div>
-                </div>
-              }
-
-              @if (field.type === fieldDescriptorType.Boolean) {
-                <label class="form-label field-label">{{ field.label }}</label>
-                <div class="flex-fill control-column long">
-                  <div class="form-check mb-0">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      [checked]="getParameterBooleanValue(field)"
-                      (change)="onParameterBooleanChange(field, $any($event.target).checked)">
-                  </div>
-                </div>
-              }
-
-              @if (field.type === fieldDescriptorType.Enum) {
-                <label class="form-label field-label">{{ field.label }}</label>
-                <div class="flex-fill control-column short">
-                  <select
-                    class="form-select w-100"
-                    [ngModel]="getParameterValue(field)"
-                    (ngModelChange)="onParameterValueChange(field, $event)">
-                    @for(option of field.enumOptions; track option) {
-                      <option [ngValue]="option">{{ option }}</option>
-                    }
-                  </select>
-                </div>
-              }
-
-              @if (field.type === fieldDescriptorType.Integer || field.type === fieldDescriptorType.Double) {
-                <label class="form-label field-label">{{ field.label }}</label>
-                <div class="flex-fill control-column tiny">
-                  <input
-                    type="number"
-                    class="form-control w-100"
-                    [class.is-invalid]="isFieldMissing(field)"
-                    [attr.step]="field.step ?? (field.type === fieldDescriptorType.Integer ? 1 : 'any')"
-                    [ngModel]="getParameterNumericValue(field)"
-                    (ngModelChange)="onParameterNumericChange(field, $event)"
-                    (blur)="onParameterNumericBlur(field, $any($event.target).value)"/>
-                  <div class="invalid-feedback">This field is required.</div>
-                </div>
-              }
-            </div>
-          }
-        }
+        <app-dynamic-fields
+          [fields]="modelConfig?.parameterFields ?? []"
+          [values]="node.parameterValues()"
+          [capabilityContext]="capabilityContext"
+          [includeNonCallDefined]="false"
+          (valuesChange)="onParameterValuesChange($event)">
+        </app-dynamic-fields>
       </div>
     </ng-template>
     <ng-template #inputsTab>

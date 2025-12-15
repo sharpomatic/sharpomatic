@@ -7,12 +7,13 @@ import { FieldDescriptor } from '../../metadata/definitions/field-descriptor';
 import { Model } from '../../metadata/definitions/model';
 import { ModelCapability } from '../../metadata/definitions/model-capability';
 import { ModelConfig } from '../../metadata/definitions/model-config';
-import { FieldDescriptorType } from '../../metadata/enumerations/field-descriptor-type';
 import { MetadataService } from '../../services/metadata.service';
 import { ServerRepositoryService } from '../../services/server.repository.service';
 import { Connector } from '../../metadata/definitions/connector';
 import { CanLeaveWithUnsavedChanges } from '../../guards/unsaved-changes.guard';
 import { Observable, map } from 'rxjs';
+import { DynamicFieldsCapabilityContext, DynamicFieldsComponent } from '../../components/dynamic-fields/dynamic-fields.component';
+import { FieldDescriptorType } from '../../metadata/enumerations/field-descriptor-type';
 
 @Component({
   selector: 'app-model',
@@ -20,6 +21,7 @@ import { Observable, map } from 'rxjs';
   imports: [
     CommonModule,
     FormsModule,
+    DynamicFieldsComponent,
   ],
   templateUrl: './model.component.html',
   styleUrls: ['./model.component.scss'],
@@ -36,7 +38,6 @@ export class ModelComponent implements OnInit, CanLeaveWithUnsavedChanges {
   private readonly modelVersion = signal(0);
   public readonly availableModelConfigs: Signal<ModelConfig[]>;
   public connectorSummaries: ConnectorSummary[] = [];
-  public readonly fieldDescriptorType = FieldDescriptorType;
 
   constructor() {
     this.availableModelConfigs = computed(() => {
@@ -123,6 +124,26 @@ export class ModelComponent implements OnInit, CanLeaveWithUnsavedChanges {
     this.setModelConfig(configId, true);
   }
 
+  public get parameterValuesRecord(): Record<string, string | null> {
+    return this.mapToRecord(this.model.parameterValues());
+  }
+
+  public get capabilityContext(): DynamicFieldsCapabilityContext | null {
+    if (!this.modelConfig) {
+      return null;
+    }
+
+    return {
+      capabilities: this.modelConfig.capabilities,
+      isCustom: this.modelConfig.isCustom,
+      customCapabilities: this.model.customCapabilities(),
+    };
+  }
+
+  public onParameterValuesChange(values: Record<string, string | null>): void {
+    this.model.parameterValues.set(this.recordToMap(values));
+  }
+
   public capabilityEntries(): { capability: ModelCapability; selected: boolean }[] {
     if (!this.modelConfig) {
       return [];
@@ -152,118 +173,6 @@ export class ModelComponent implements OnInit, CanLeaveWithUnsavedChanges {
 
   public isCustomCapabilityEnabled(capability: string): boolean {
     return this.model.customCapabilities().has(capability);
-  }
-
-  public getParameterValue(field: FieldDescriptor): string {
-    const value = this.getResolvedParameterValue(field);
-    return value ?? '';
-  }
-
-  public onParameterValueChange(field: FieldDescriptor, value: string): void {
-    this.model.parameterValues.update(map => {
-      const next = new Map(map);
-      next.set(field.name, value === '' ? null : value ?? '');
-      return next;
-    });
-  }
-
-  public onParameterStringBlur(field: FieldDescriptor, rawValue: string | null): void {
-    if (field.type === FieldDescriptorType.Secret) {
-      return;
-    }
-
-    if (rawValue !== '') {
-      return;
-    }
-
-    if (field.isRequired && field.defaultValue != null) {
-      this.model.parameterValues.update(map => {
-        const next = new Map(map);
-        next.set(field.name, String(field.defaultValue));
-        return next;
-      });
-    }
-  }
-
-  public getParameterNumericValue(field: FieldDescriptor): string {
-    const value = this.getResolvedParameterValue(field);
-    return value ?? '';
-  }
-
-  public onParameterNumericChange(field: FieldDescriptor, value: string | number): void {
-    this.model.parameterValues.update(map => {
-      const next = new Map(map);
-      if (value === '' || value === null || value === undefined) {
-        next.set(field.name, null);
-      } else {
-        next.set(field.name, String(value));
-      }
-      return next;
-    });
-  }
-
-  public isFieldMissing(field: FieldDescriptor): boolean {
-    if (!field.isRequired) {
-      return false;
-    }
-
-    const value = this.getResolvedParameterValue(field);
-    return value === null || value === '';
-  }
-
-  public onParameterNumericBlur(field: FieldDescriptor, rawValue: string | null): void {
-    if (rawValue === null || rawValue === '') {
-      const shouldApplyDefault = field.isRequired && field.defaultValue != null;
-      const defaultValue = shouldApplyDefault ? String(field.defaultValue) : null;
-      this.model.parameterValues.update(map => {
-        const next = new Map(map);
-        next.set(field.name, defaultValue);
-        return next;
-      });
-      return;
-    }
-
-    let numeric = Number(rawValue);
-    if (!Number.isFinite(numeric)) {
-      return;
-    }
-
-    if (field.type === FieldDescriptorType.Integer) {
-      numeric = Math.trunc(numeric);
-    }
-
-    if (field.min != null && numeric < field.min) {
-      numeric = field.min;
-    }
-
-    if (field.max != null && numeric > field.max) {
-      numeric = field.max;
-    }
-
-    const finalValue = numeric.toString();
-    this.model.parameterValues.update(map => {
-      const next = new Map(map);
-      next.set(field.name, finalValue);
-      return next;
-    });
-  }
-
-  public getParameterBooleanValue(field: FieldDescriptor): boolean {
-    const value = this.model.parameterValues().get(field.name);
-
-    if (value != null) {
-      return value.toLowerCase() === 'true';
-    }
-
-    return field.defaultValue === true;
-  }
-
-  public onParameterBooleanChange(field: FieldDescriptor, checked: boolean): void {
-    this.model.parameterValues.update(map => {
-      const next = new Map(map);
-      next.set(field.name, checked ? 'true' : 'false');
-      return next;
-    });
   }
 
   private setModelConfig(configId: string, resetValues: boolean): void {
@@ -313,19 +222,6 @@ export class ModelComponent implements OnInit, CanLeaveWithUnsavedChanges {
     return next;
   }
 
-  private getResolvedParameterValue(field: FieldDescriptor): string | null {
-    const parameterValues = this.model.parameterValues();
-    if (parameterValues.has(field.name)) {
-      return parameterValues.get(field.name) ?? null;
-    }
-
-    if (field.defaultValue != null) {
-      return String(field.defaultValue);
-    }
-
-    return null;
-  }
-
   private applyFieldConstraints(field: FieldDescriptor, value: string | null): string | null {
     if (value === null) {
       return null;
@@ -365,6 +261,16 @@ export class ModelComponent implements OnInit, CanLeaveWithUnsavedChanges {
     this.serverRepository.getConnector(connectorId).subscribe((connector: Connector | null) => {
       this.connectorConfigId.set(connector?.configId() ?? null);
     });
+  }
+
+  private mapToRecord(values: Map<string, string | null>): Record<string, string | null> {
+    const entries = Array.from(values.entries()).map(([key, value]) => [key, value ?? null] as const);
+    return Object.fromEntries(entries);
+  }
+
+  private recordToMap(values: Record<string, string | null>): Map<string, string | null> {
+    const entries = Object.entries(values ?? {}).map(([key, value]) => [key, value ?? null] as const);
+    return new Map(entries);
   }
 
   hasUnsavedChanges(): boolean {

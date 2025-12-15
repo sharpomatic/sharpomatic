@@ -57,65 +57,11 @@
           </select>
         </div>
       </div>
-      @for (field of selectedAuthMode?.fields; track field.name) {      
-      <div class="mb-3 form-line">
-        @if (field.type === fieldDescriptorType.String || field.type === fieldDescriptorType.Secret) {
-        <label class="form-label field-label">{{ field.label }}</label>
-        <div class="flex-fill control-column long">
-          <input
-            [type]="field.type === fieldDescriptorType.Secret ? 'password' : 'text'"
-            class="form-control w-100"
-            [class.is-invalid]="isFieldMissing(field)"
-            [ngModel]="getFieldValue(field)"
-            (ngModelChange)="onFieldValueChange(field, $event)"
-            (blur)="onFieldStringBlur(field, $any($event.target).value)"/>
-          <div class="invalid-feedback">This field is required.</div>
-        </div>
-        }
-
-        @if (field.type === fieldDescriptorType.Boolean) {
-        <label class="form-label field-label">{{ field.label }}</label>
-        <div class="flex-fill control-column short">
-          <div class="form-check mb-0">
-            <input
-              class="form-check-input"
-              type="checkbox"
-              [checked]="getFieldBooleanValue(field)"
-              (change)="onFieldBooleanChange(field, $any($event.target).checked)">
-          </div>
-        </div>
-        }
-
-        @if (field.type === fieldDescriptorType.Enum) {
-        <label class="form-label field-label">{{ field.label }}</label>
-        <div class="flex-fill control-column short">
-          <select
-            class="form-select w-100"
-            [ngModel]="getFieldValue(field)"
-            (ngModelChange)="onFieldValueChange(field, $event)">
-            @for(option of field.enumOptions; track option) {
-              <option [ngValue]="option">{{ option }}</option>
-            }
-          </select>
-        </div>
-        }
-
-        @if (field.type === fieldDescriptorType.Integer || field.type === fieldDescriptorType.Double) {
-        <label class="form-label field-label">{{ field.label }}</label>
-        <div class="flex-fill control-column tiny">
-          <input
-            type="number"
-            class="form-control w-100"
-            [class.is-invalid]="isFieldMissing(field)"
-            [attr.step]="field.step ?? (field.type === fieldDescriptorType.Integer ? 1 : 'any')"
-            [ngModel]="getFieldNumericValue(field)"
-            (ngModelChange)="onFieldNumericChange(field, $event)"
-            (blur)="onFieldNumericBlur(field, $any($event.target).value)"/>
-          <div class="invalid-feedback">This field is required.</div>
-        </div>
-        }
-      </div>
-      }
+      <app-dynamic-fields
+        [fields]="selectedAuthMode?.fields ?? []"
+        [values]="connectorFieldValuesRecord"
+        (valuesChange)="onConnectorFieldValuesChange($event)">
+      </app-dynamic-fields>
     }
   </div>
 </div>

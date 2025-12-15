@@ -12,6 +12,7 @@ import { Model } from '../../metadata/definitions/model';
 import { ModelConfig } from '../../metadata/definitions/model-config';
 import { FieldDescriptor } from '../../metadata/definitions/field-descriptor';
 import { FieldDescriptorType } from '../../metadata/enumerations/field-descriptor-type';
+import { DynamicFieldsCapabilityContext, DynamicFieldsComponent } from '../../components/dynamic-fields/dynamic-fields.component';
 
 @Component({
   selector: 'app-model-call-node-dialog',
@@ -21,6 +22,7 @@ import { FieldDescriptorType } from '../../metadata/enumerations/field-descripto
     FormsModule,
     TabComponent,
     ContextViewerComponent,
+    DynamicFieldsComponent,
   ],
   templateUrl: './model-call-node-dialog.component.html',
   styleUrls: ['./model-call-node-dialog.component.scss'],
@@ -39,10 +41,20 @@ export class ModelCallNodeDialogComponent implements OnInit {
   public availableModels: ModelSummary[] = [];
   public selectedModelId: string | null = null;
   public showTextFields = false;
-  public readonly fieldDescriptorType = FieldDescriptorType;
+  public get capabilityContext(): DynamicFieldsCapabilityContext | null {
+    if (!this.modelConfig) {
+      return null;
+    }
+
+    return {
+      capabilities: this.modelConfig.capabilities,
+      isCustom: this.modelConfig.isCustom,
+      customCapabilities: this.loadedModel?.customCapabilities(),
+    };
+  }
 
   private loadedModel: Model | null = null;
-  private modelConfig: ModelConfig | null = null;
+  public modelConfig: ModelConfig | null = null;
   private modelConfigsCache: ModelConfig[] = [];
 
   private readonly serverRepository = inject(ServerRepositoryService);
@@ -164,27 +176,6 @@ export class ModelCallNodeDialogComponent implements OnInit {
     this.showTextFields = customCapabilities.has('SupportsText');
   }
 
-  public getCallParameterFields(): FieldDescriptor[] {
-    if (!this.modelConfig) {
-      return [];
-    }
-
-    return this.modelConfig.parameterFields.filter(field => field.callDefined);
-  }
-
-  public shouldShowField(field: FieldDescriptor): boolean {
-    if (!this.modelConfig || !field.callDefined) {
-      return false;
-    }
-
-    if (!field.capability) {
-      return true;
-    }
-
-    return this.isCapabilityEnabled(field.capability) &&
-      (!this.modelConfig.isCustom || this.isCustomCapabilityEnabled(field.capability));
-  }
-
   public isCapabilityEnabled(capability: string): boolean {
     return Boolean(this.modelConfig?.capabilities.some(c => c.name === capability));
   }
@@ -193,120 +184,8 @@ export class ModelCallNodeDialogComponent implements OnInit {
     return this.loadedModel?.customCapabilities().has(capability) ?? false;
   }
 
-  public getParameterValue(field: FieldDescriptor): string {
-    const value = this.getResolvedParameterValue(field);
-    return value ?? '';
-  }
-
-  public getParameterNumericValue(field: FieldDescriptor): string {
-    const value = this.getResolvedParameterValue(field);
-    return value ?? '';
-  }
-
-  public getParameterBooleanValue(field: FieldDescriptor): boolean {
-    const values = this.node.parameterValues();
-    const value = values[field.name];
-
-    if (value != null) {
-      return value.toLowerCase() === 'true';
-    }
-
-    return field.defaultValue === true;
-  }
-
-  public onParameterValueChange(field: FieldDescriptor, value: string): void {
-    this.node.parameterValues.update(values => ({
-      ...values,
-      [field.name]: value === '' ? null : value ?? '',
-    }));
-  }
-
-  public onParameterStringBlur(field: FieldDescriptor, rawValue: string | null): void {
-    if (field.type === FieldDescriptorType.Secret) {
-      return;
-    }
-
-    if (rawValue !== '') {
-      return;
-    }
-
-    if (field.isRequired && field.defaultValue != null) {
-      this.node.parameterValues.update(values => ({
-        ...values,
-        [field.name]: String(field.defaultValue),
-      }));
-    }
-  }
-
-  public onParameterNumericChange(field: FieldDescriptor, value: string | number): void {
-    this.node.parameterValues.update(values => ({
-      ...values,
-      [field.name]: value === '' || value === null || value === undefined ? null : String(value),
-    }));
-  }
-
-  public onParameterNumericBlur(field: FieldDescriptor, rawValue: string | null): void {
-    if (rawValue === null || rawValue === '') {
-      const shouldApplyDefault = field.isRequired && field.defaultValue != null;
-      const defaultValue = shouldApplyDefault ? String(field.defaultValue) : null;
-      this.node.parameterValues.update(values => ({
-        ...values,
-        [field.name]: defaultValue,
-      }));
-      return;
-    }
-
-    let numeric = Number(rawValue);
-    if (!Number.isFinite(numeric)) {
-      return;
-    }
-
-    if (field.type === FieldDescriptorType.Integer) {
-      numeric = Math.trunc(numeric);
-    }
-
-    if (field.min != null && numeric < field.min) {
-      numeric = field.min;
-    }
-
-    if (field.max != null && numeric > field.max) {
-      numeric = field.max;
-    }
-
-    const finalValue = numeric.toString();
-    this.node.parameterValues.update(values => ({
-      ...values,
-      [field.name]: finalValue,
-    }));
-  }
-
-  public onParameterBooleanChange(field: FieldDescriptor, checked: boolean): void {
-    this.node.parameterValues.update(values => ({
-      ...values,
-      [field.name]: checked ? 'true' : 'false',
-    }));
-  }
-
-  public isFieldMissing(field: FieldDescriptor): boolean {
-    if (!field.isRequired) {
-      return false;
-    }
-
-    const value = this.getResolvedParameterValue(field);
-    return value === null || value === '';
-  }
-
-  private getResolvedParameterValue(field: FieldDescriptor): string | null {
-    const parameterValues = this.node.parameterValues();
-    if (parameterValues && field.name in parameterValues) {
-      return parameterValues[field.name];
-    }
-
-    if (field.defaultValue != null) {
-      return String(field.defaultValue);
-    }
-
-    return null;
+  public onParameterValuesChange(values: Record<string, string | null>): void {
+    this.node.parameterValues.set(values);
   }
 
   private syncCallParameterValues(): void {
