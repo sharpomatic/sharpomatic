@@ -25,6 +25,7 @@ export class DynamicFieldsComponent {
   @Input() fields: FieldDescriptor[] = [];
   @Input() values: Record<string, string | null> = {};
   @Input() capabilityContext: DynamicFieldsCapabilityContext | null = null;
+  @Input() allowedCapabilities: string[] | null = null;
   @Input() includeCallDefined = true;
   @Input() includeNonCallDefined = true;
   @Input() disabled = false;
@@ -41,6 +42,12 @@ export class DynamicFieldsComponent {
 
     if (!isCallDefined && !this.includeNonCallDefined) {
       return false;
+    }
+
+    if (this.allowedCapabilities && this.allowedCapabilities.length) {
+      if (!field.capability || !this.allowedCapabilities.includes(field.capability)) {
+        return false;
+      }
     }
 
     if (!field.capability) {
