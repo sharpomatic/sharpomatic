@@ -89,6 +89,28 @@
 
         @if (isSchemaMode) {
           <div class="mt-3">
+            <div class="mb-2 form-line">
+              <label class="form-label field-label">Schema Name</label>
+              <div class="flex-fill control-column short">
+                <input
+                  type="text"
+                  class="form-control w-100"
+                  [ngModel]="node.parameterValues()['structured_output_schema_name'] ?? ''"
+                  (ngModelChange)="onStructuredSchemaNameChange($event)" />
+              </div>
+            </div>
+
+            <div class="mb-2 form-line align-top">
+              <label class="form-label field-label align-top">Schema Description</label>
+              <div class="flex-fill control-column extra-long">
+                <textarea
+                  class="form-control w-100"
+                  rows="3"
+                  [ngModel]="node.parameterValues()['structured_output_schema_description'] ?? ''"
+                  (ngModelChange)="onStructuredSchemaDescriptionChange($event)"></textarea>
+              </div>
+            </div>
+
             <div class="mb-2 form-line align-top">
               <label class="form-label field-label align-top">Schema</label>
               <div class="flex-fill control-column extra-long">

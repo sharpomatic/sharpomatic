@@ -207,6 +207,20 @@ export class ModelCallNodeDialogComponent implements OnInit {
     }));
   }
 
+  public onStructuredSchemaNameChange(value: string): void {
+    this.node.parameterValues.update(v => ({
+      ...v,
+      structured_output_schema_name: value ?? '',
+    }));
+  }
+
+  public onStructuredSchemaDescriptionChange(value: string): void {
+    this.node.parameterValues.update(v => ({
+      ...v,
+      structured_output_schema_description: value ?? '',
+    }));
+  }
+
   private syncCallParameterValues(): void {
     if (!this.modelConfig) {
       return;

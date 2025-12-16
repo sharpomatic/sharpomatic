@@ -83,8 +83,17 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
                 Node.ParameterValues.TryGetValue("structured_output_schema", out var outputSchema) &&
                 !string.IsNullOrWhiteSpace(outputSchema))
             {
+                Node.ParameterValues.TryGetValue("structured_output_schema_name", out var schemaName);
+                Node.ParameterValues.TryGetValue("structured_output_schema_description", out var schemaDescription);
+
+                if (string.IsNullOrWhiteSpace(schemaName))
+                    schemaName = null;
+
+                if (string.IsNullOrWhiteSpace(schemaDescription))
+                    schemaDescription = null;
+
                 JsonElement element = JsonSerializer.Deserialize<JsonElement>(outputSchema);
-                chatOptions.ResponseFormat = ChatResponseFormat.ForJsonSchema(element);
+                chatOptions.ResponseFormat = ChatResponseFormat.ForJsonSchema(element, schemaName: schemaName, schemaDescription: schemaDescription);
             }
         }
 
