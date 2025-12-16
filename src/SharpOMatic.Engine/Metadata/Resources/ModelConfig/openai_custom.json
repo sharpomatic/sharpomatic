@@ -23,7 +23,7 @@
     },
     {
       "Name": "SupportsStructuredOutput",
-      "DisplayName": "Structured Output"
+      "DisplayName": "Supports Structured Output"
     }
   ],
   "ParameterFields": [

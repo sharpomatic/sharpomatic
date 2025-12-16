@@ -1,3 +1,5 @@
+using SharpOMatic.Server;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("http://localhost:9001");
@@ -8,8 +10,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new NodeEntityConverter());
 });
 builder.Services.AddSignalR();
-builder.Services.AddSharpOMaticEngine();
 builder.Services.AddSingleton<INotification, NotificationService>();
+builder.Services.AddSharpOMaticEngine();
+builder.Services.AddSharpOMaticTypes(typeof(TriviaResponse), typeof(StringList));
 builder.Services.AddSharpOMaticRepository((options) =>
 {
     var folder = Environment.SpecialFolder.LocalApplicationData;

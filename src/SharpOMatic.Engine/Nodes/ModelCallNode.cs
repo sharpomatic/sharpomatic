@@ -54,6 +54,27 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
 
         var chatOptions = new ChatOptions();
 
+        if (modelConfig.Capabilities.Any(c => c.Name == "SupportsMaxOutputTokens") &&
+            model.ParameterValues.TryGetValue("max_output_tokens", out var paramMaxOutputTokens) &&
+            int.TryParse(paramMaxOutputTokens, out var maxOutputTokens))
+        {
+            chatOptions.MaxOutputTokens = maxOutputTokens;
+        }
+
+        if (modelConfig.Capabilities.Any(c => c.Name == "SupportsTemperature") &&
+            model.ParameterValues.TryGetValue("temperature", out var paramTemperature) &&
+            float.TryParse(paramTemperature, out var temperature))
+        {
+            chatOptions.Temperature = temperature;
+        }
+
+        if (modelConfig.Capabilities.Any(c => c.Name == "SupportsTopP") &&
+            model.ParameterValues.TryGetValue("top_p", out var paramTopP) &&
+            float.TryParse(paramTopP, out var topP))
+        {
+            chatOptions.TopP = topP;
+        }
+
         if (modelConfig.Capabilities.Any(c => c.Name == "SupportsStructuredOutput") &&
             Node.ParameterValues.TryGetValue("structured_output", out var outputFormat))
 
@@ -62,22 +83,9 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
                 Node.ParameterValues.TryGetValue("structured_output_schema", out var outputSchema) &&
                 !string.IsNullOrWhiteSpace(outputSchema))
             {
-                //JsonElement example = AIJsonUtilities.CreateJsonSchema(typeof(Response));
-                //var responseString = JsonSerializer.Serialize(example);
-
-
                 JsonElement element = JsonSerializer.Deserialize<JsonElement>(outputSchema);
                 chatOptions.ResponseFormat = ChatResponseFormat.ForJsonSchema(element);
             }
-        }
-
-        // JsonElement schema = AIJsonUtilities.CreateJsonSchema(typeof(PersonInfo));
-
-        if (modelConfig.Capabilities.Any(c => c.Name == "SupportsMaxOutputTokens") &&
-            model.ParameterValues.TryGetValue("max_output_tokens", out var paramMaxOutputTokens) &&
-            int.TryParse(paramMaxOutputTokens, out var maxOutputTokens))
-        {
-            chatOptions.MaxOutputTokens = maxOutputTokens;
         }
 
         OpenAIClient client = new OpenAIClient(apiKey);
@@ -95,11 +103,5 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
         ThreadContext.RunContext.MergeContexts(ThreadContext.NodeContext, tempContext);
 
         return ("Model call executed", new List<NextNodeData> { new(ThreadContext, RunContext.ResolveSingleOutput(Node)) });
-    }
-
-    public class Response
-    {
-        public required string Answer { get; set; }
-        public required string Reason { get; set; }
     }
 }

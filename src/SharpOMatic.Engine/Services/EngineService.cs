@@ -3,7 +3,7 @@
 public class EngineService(IRepository Repository,
                            INodeQueue Queue,
                            INotification Notifications,
-                           IEnumerable<JsonConverter> JsonConverters) : IEngine
+                           IJsonConverterService? JsonConverterService = null) : IEngine
 {
 
 
@@ -29,6 +29,8 @@ public class EngineService(IRepository Repository,
         if (currentNodes.Count != 1)
             throw new SharpOMaticException("Must have exactly one start node.");
 
+        var converters = JsonConverterService?.GetConverters() ?? [];
+
         var run = new Run()
         {
             WorkflowId = workflowId,
@@ -37,10 +39,10 @@ public class EngineService(IRepository Repository,
             Message = "Created",
             Created = DateTime.Now,
             InputEntries = inputJson,
-            InputContext = JsonSerializer.Serialize(nodeContext, new JsonSerializerOptions().BuildOptions(JsonConverters))
+            InputContext = JsonSerializer.Serialize(nodeContext, new JsonSerializerOptions().BuildOptions(converters))
         };
 
-        var runContext = new RunContext(Repository, Notifications, JsonConverters, workflow, run);
+        var runContext = new RunContext(Repository, Notifications, converters, workflow, run);
         var threadContext = new ThreadContext(runContext, nodeContext);
 
         await runContext.RunUpdated();

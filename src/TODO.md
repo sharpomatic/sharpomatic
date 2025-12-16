@@ -11,6 +11,9 @@ Designer
 Model Call
 	- Support tool calling, reuse existing attributes etc?
 	- Support structured output
+		'Types'
+        schemaName: "PersonInfo",
+        schemaDescription: "Information about a person including their name, age, and occupation")
 
 Connection
 	- Add test button to check connectivity
