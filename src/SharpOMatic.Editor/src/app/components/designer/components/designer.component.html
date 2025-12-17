@@ -3,6 +3,7 @@
   (mousedown)="onSurfaceMouseDown($event)"
   (mousemove)="onSurfaceMove($event)" 
   (mouseup)="onSurfaceMouseUp($event)"
+  (wheel)="onSurfaceWheel($event)"
   (mouseleave)="onSurfaceLeave()"
   (contextmenu)="onSurfaceContextMenu($event)">
   @if (selectionRect(); as rect) {
@@ -14,7 +15,8 @@
   }
 
   <div class="designer-content" [style.transform]="getPanTransform()">
-    <svg class="connector-surface">
+    <div class="designer-zoom" [style.transform]="getZoomTransform()">
+      <svg class="connector-surface">
       <defs>
         <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
           <polygon points="0 0, 10 3.5, 0 7" fill="#DEE2E6" />
@@ -35,51 +37,52 @@
       @if (pendingConnection(); as pending) {
         <path class="connector-path pending" [attr.d]="getConnectionCurve(pending)" marker-end="url(#arrowhead)"></path>
       }
-    </svg>
+      </svg>
 
-    @for (node of workflow().nodes(); track node.id) {
-    <div class="node" 
-      (mousedown)="onNodeMouseDown(node, $event)" 
-      (mouseup)="onNodeMouseUp(node, $event)"
-      (dblclick)="onNodeDoubleClick(node)" 
-      [class.running]="!selectedEntities().includes(node) && node.displayState() === NodeStatus.Running"
-      [class.success]="!selectedEntities().includes(node) && node.displayState() === NodeStatus.Success"
-      [class.failed]="!selectedEntities().includes(node) && node.displayState() === NodeStatus.Failed" 
-      [class.selected]="selectedEntities().includes(node)"
-      [style.width.px]="node.width()"
-      [style.height.px]="node.height()" 
-      [style.transform]="'translate(' + node.left() + 'px, ' + node.top() + 'px)'">
-      <div class="node-title">{{ node.title() }}</div>
-      <div class="node-title">{{ node.title() }}</div>
-      @if (getNodeSymbol(node.nodeType()); as symbol) {
-      <i class="node-symbol bi" [class]="symbol"></i>
-      }
-      @for (connector of node.inputs(); track connector.id) {
-      <div class="connector input" 
-        (mousedown)="onInputMouseDown(connector, $event)"
-        (mouseup)="onInputMouseUp(connector, $event)" 
-        [style.width.px]="16" [style.height.px]="16"
-        [style.transform]="'translate(-50%, ' + connector.boxOffset() + 'px)'"></div>
-      @if (connector.name()) {
-      <span class="connector-label input"
-        [style.transform]="'translate(-' + connector.labelOffsetH() + 'px, ' + connector.labelOffsetV() + 'px)'">{{
-        connector.name() }}</span>
-      }
-      }
-      @for (connector of node.outputs(); track connector.id) {
-      <div class="connector output" 
-        (mousedown)="onOutputMouseDown(connector, $event)"
-        (mouseup)="onOutputMouseUp(connector, $event)" 
-        [style.width.px]="16" 
-        [style.height.px]="16"
-        [style.transform]="'translate(50%, ' + connector.boxOffset() + 'px)'"></div>
+      @for (node of workflow().nodes(); track node.id) {
+      <div class="node" 
+        (mousedown)="onNodeMouseDown(node, $event)" 
+        (mouseup)="onNodeMouseUp(node, $event)"
+        (dblclick)="onNodeDoubleClick(node)" 
+        [class.running]="!selectedEntities().includes(node) && node.displayState() === NodeStatus.Running"
+        [class.success]="!selectedEntities().includes(node) && node.displayState() === NodeStatus.Success"
+        [class.failed]="!selectedEntities().includes(node) && node.displayState() === NodeStatus.Failed" 
+        [class.selected]="selectedEntities().includes(node)"
+        [style.width.px]="node.width()"
+        [style.height.px]="node.height()" 
+        [style.transform]="'translate(' + node.left() + 'px, ' + node.top() + 'px)'">
+        <div class="node-title">{{ node.title() }}</div>
+        <div class="node-title">{{ node.title() }}</div>
+        @if (getNodeSymbol(node.nodeType()); as symbol) {
+        <i class="node-symbol bi" [class]="symbol"></i>
+        }
+        @for (connector of node.inputs(); track connector.id) {
+        <div class="connector input" 
+          (mousedown)="onInputMouseDown(connector, $event)"
+          (mouseup)="onInputMouseUp(connector, $event)" 
+          [style.width.px]="16" [style.height.px]="16"
+          [style.transform]="'translate(-50%, ' + connector.boxOffset() + 'px)'"></div>
         @if (connector.name()) {
-        <span class="connector-label output"
-          [style.transform]="'translate(' + connector.labelOffsetH() + 'px, ' + connector.labelOffsetV() + 'px)'">{{
+        <span class="connector-label input"
+          [style.transform]="'translate(-' + connector.labelOffsetH() + 'px, ' + connector.labelOffsetV() + 'px)'">{{
           connector.name() }}</span>
         }
+        }
+        @for (connector of node.outputs(); track connector.id) {
+        <div class="connector output" 
+          (mousedown)="onOutputMouseDown(connector, $event)"
+          (mouseup)="onOutputMouseUp(connector, $event)" 
+          [style.width.px]="16" 
+          [style.height.px]="16"
+          [style.transform]="'translate(50%, ' + connector.boxOffset() + 'px)'"></div>
+          @if (connector.name()) {
+          <span class="connector-label output"
+            [style.transform]="'translate(' + connector.labelOffsetH() + 'px, ' + connector.labelOffsetV() + 'px)'">{{
+            connector.name() }}</span>
+          }
+        }
+    </div>
       }
-  </div>
-    }
+    </div>
   </div>
 </div>

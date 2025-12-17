@@ -50,10 +50,13 @@ export class DesignerComponent {
   public selectionRect: WritableSignal<Rect | null> = signal(null);
   public pendingConnection: WritableSignal<{ from: ConnectorEntity, targetPoint: Point } | null> = signal(null);
   public panOffset: WritableSignal<Point> = signal({ x: 0, y: 0 });
+  public zoom: WritableSignal<number> = signal(1);
 
   public NodeStatus = NodeStatus;
   public NodeType = NodeType;
 
+  private readonly minZoom = 0.25;
+  private readonly maxZoom = 3;
   private isSurfaceEnabled = false;
   private isSurfaceDragging = false;
   private isNodeEnabled = false;
@@ -77,8 +80,16 @@ export class DesignerComponent {
 
   private getMouseWorldPoint(event: MouseEvent): Point {
     const viewPoint = this.getMouseViewPoint(event);
+    return this.viewToWorld(viewPoint);
+  }
+
+  private viewToWorld(viewPoint: Point): Point {
     const offset = this.panOffset();
-    return { x: viewPoint.x - offset.x, y: viewPoint.y - offset.y };
+    const zoom = this.zoom();
+    return {
+      x: (viewPoint.x - offset.x) / zoom,
+      y: (viewPoint.y - offset.y) / zoom,
+    };
   }
 
   onSurfaceMouseDown(event: MouseEvent): void {
@@ -145,15 +156,18 @@ export class DesignerComponent {
 
       const workflow = this.workflow();
       const pan = this.panOffset();
+      const zoom = this.zoom();
       const selectedNodes = workflow.nodes()
         .filter(node => {
-          const nodeLeft = node.left() + pan.x;
-          const nodeTop = node.top() + pan.y;
+          const nodeLeft = (node.left() * zoom) + pan.x;
+          const nodeTop = (node.top() * zoom) + pan.y;
+          const nodeRight = nodeLeft + node.width() * zoom;
+          const nodeBottom = nodeTop + node.height() * zoom;
           return (
             nodeLeft >= left &&
-            nodeLeft + node.width() <= left + width &&
+            nodeRight <= left + width &&
             nodeTop >= top &&
-            nodeTop + node.height() <= top + height
+            nodeBottom <= top + height
           );
         });
 
@@ -368,7 +382,7 @@ export class DesignerComponent {
       }
 
       startX = (fromNode.left() + fromNode.width()) + 6;
-      startY = (fromNode.top() + fromConnector.boxOffset() + ConnectorEntity.DISPLAY_SIZE - 5);
+      startY = (fromNode.top() + fromConnector.boxOffset() + ConnectorEntity.DISPLAY_SIZE - 4);
       endX = toNode.left() - 25;
       endY = (toNode.top() + toConnector.boxOffset() + ConnectorEntity.DISPLAY_SIZE - 5);
     } else {
@@ -379,12 +393,12 @@ export class DesignerComponent {
       }
 
       startX = (fromNode.left() + fromNode.width()) + 10;
-      startY = (fromNode.top() + connection.from.boxOffset() + ConnectorEntity.DISPLAY_SIZE - 5);
+      startY = (fromNode.top() + connection.from.boxOffset() + ConnectorEntity.DISPLAY_SIZE - 4);
       endX = connection.targetPoint.x - 25;
       endY = connection.targetPoint.y + 2;
     }
 
-    const controlPointOffset = 80; // Adjust this value for more or less curve
+    const controlPointOffset = 20; // Adjust this value for more or less curve
     const controlX1 = startX + controlPointOffset;
     const controlY1 = startY;
     const controlX2 = endX - controlPointOffset;
@@ -407,6 +421,10 @@ export class DesignerComponent {
     return `translate(${offset.x}px, ${offset.y}px)`;
   }
 
+  public getZoomTransform(): string {
+    return `scale(${this.zoom()})`;
+  }
+
   public isPanDragging(): boolean {
     return this.isPanning;
   }
@@ -418,6 +436,14 @@ export class DesignerComponent {
 
   public resetPanOffset(): void {
     this.setPanOffset({ x: 0, y: 0 });
+  }
+
+  onSurfaceWheel(event: WheelEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const anchorView = this.getMouseViewPoint(event);
+    this.adjustZoom(event.deltaY, anchorView);
   }
 
   onSurfaceLeave(): void {
@@ -432,18 +458,46 @@ export class DesignerComponent {
     this.panOffset.set(clamped);
   }
 
+  private adjustZoom(deltaY: number, anchorViewPoint: Point): void {
+    const currentZoom = this.zoom();
+    const worldPoint = this.viewToWorld(anchorViewPoint);
+    const zoomFactor = deltaY < 0 ? 1.1 : 0.9;
+    const newZoom = this.clampZoom(currentZoom * zoomFactor);
+
+    if (newZoom === currentZoom) {
+      return;
+    }
+
+    this.zoom.set(newZoom);
+
+    const newPan: Point = {
+      x: anchorViewPoint.x - worldPoint.x * newZoom,
+      y: anchorViewPoint.y - worldPoint.y * newZoom,
+    };
+
+    this.setPanOffset(newPan);
+  }
+
+  private clampZoom(value: number): number {
+    return Math.min(this.maxZoom, Math.max(this.minZoom, value));
+  }
+
   private clampPanOffset(offset: Point): Point {
     const nodes = this.workflow().nodes();
     if (!nodes.length) {
-      return offset;
+      return {
+        x: Math.min(offset.x, 3000),
+        y: Math.min(offset.y, 3000),
+      };
     }
 
+    const zoom = this.zoom();
     const maxLeft = Math.max(...nodes.map(n => n.left()));
     const maxTop = Math.max(...nodes.map(n => n.top()));
 
     return {
-      x: Math.min(Math.max(offset.x, -maxLeft), 3000),
-      y: Math.min(Math.max(offset.y, -maxTop), 3000),
+      x: Math.min(Math.max(offset.x, -maxLeft * zoom), 3000),
+      y: Math.min(Math.max(offset.y, -maxTop * zoom), 3000),
     };
   }
 }

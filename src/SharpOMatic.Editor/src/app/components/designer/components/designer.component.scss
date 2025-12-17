@@ -27,6 +27,12 @@
   transform-origin: 0 0;
 }
 
+.designer-zoom {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
+
 @keyframes border-pulse {
   0% {
     border-color: #377af5; /* Color 1: Blue */
