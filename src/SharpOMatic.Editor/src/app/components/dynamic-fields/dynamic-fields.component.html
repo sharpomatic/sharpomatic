@@ -2,7 +2,7 @@
   @if (shouldShowField(field)) {
     <div class="mb-3 form-line">
       @if (field.type === fieldDescriptorType.String || field.type === fieldDescriptorType.Secret) {
-        <label class="form-label field-label">{{ field.label }}</label>
+        <label class="form-label field-label align-top">{{ field.label }}</label>
         <div class="flex-fill control-column long">
           <input
             [type]="field.type === fieldDescriptorType.Secret ? 'password' : 'text'"
@@ -17,7 +17,7 @@
       }
 
       @if (field.type === fieldDescriptorType.Boolean) {
-        <label class="form-label field-label">{{ field.label }}</label>
+        <label class="form-label field-label align-top">{{ field.label }}</label>
         <div class="flex-fill control-column long">
           <div class="form-check mb-0">
             <input
@@ -31,7 +31,7 @@
       }
 
       @if (field.type === fieldDescriptorType.Enum) {
-        <label class="form-label field-label">{{ field.label }}</label>
+        <label class="form-label field-label align-top">{{ field.label }}</label>
         <div class="flex-fill control-column short">
           <select
             class="form-select w-100"
@@ -46,7 +46,7 @@
       }
 
       @if (field.type === fieldDescriptorType.Integer || field.type === fieldDescriptorType.Double) {
-        <label class="form-label field-label">{{ field.label }}</label>
+        <label class="form-label field-label align-top">{{ field.label }}</label>
         <div class="flex-fill control-column tiny">
           <input
             type="number"

@@ -29,6 +29,10 @@
   flex: 0 0 150px;
   margin-bottom: 0;
   text-align: right;
+
+  &.align-top {
+    align-self: flex-start;
+  }
 }
 
 .control-column {
@@ -47,6 +51,10 @@
 
 .form-line .form-check-input {
   margin-left: 0;
+}
+
+.form-check-label {
+  margin-left: 12px;
 }
 
 .icon-sm {

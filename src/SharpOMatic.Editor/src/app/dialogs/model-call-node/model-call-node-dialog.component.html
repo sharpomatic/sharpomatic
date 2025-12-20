@@ -37,6 +37,18 @@
           </div>
         </div>
 
+        <app-dynamic-fields
+          [fields]="modelConfig?.parameterFields ?? []"
+          [values]="node.parameterValues()"
+          [capabilityContext]="capabilityContext"
+          [ignoredCapabilities]="['SupportsStructuredOutput', 'SupportsToolCalling', 'SupportsText']"
+          [includeNonCallDefined]="false"
+          (valuesChange)="onParameterValuesChange($event)">
+        </app-dynamic-fields>
+      </div>
+    </ng-template>
+    <ng-template #textTab>
+      <div class="bg-body-tertiary p-3">
         @if (showTextFields) {
           <div class="mb-3 form-line">
             <label for="model-call-text-output" class="form-label field-label">Text Output Path</label>
@@ -69,8 +81,22 @@
           [fields]="modelConfig?.parameterFields ?? []"
           [values]="node.parameterValues()"
           [capabilityContext]="capabilityContext"
-          [ignoredCapabilities]="['SupportsStructuredOutput']"
+          [includeCallDefined]="true"
           [includeNonCallDefined]="false"
+          [allowedCapabilities]="['SupportsText']"
+          (valuesChange)="onParameterValuesChange($event)">
+        </app-dynamic-fields>
+      </div>
+    </ng-template>
+    <ng-template #toolCallingTab>
+      <div class="bg-body-tertiary p-3">
+        <app-dynamic-fields
+          [fields]="modelConfig?.parameterFields ?? []"
+          [values]="node.parameterValues()"
+          [capabilityContext]="capabilityContext"
+          [includeCallDefined]="true"
+          [includeNonCallDefined]="false"
+          [allowedCapabilities]="['SupportsToolCalling']"
           (valuesChange)="onParameterValuesChange($event)">
         </app-dynamic-fields>
       </div>

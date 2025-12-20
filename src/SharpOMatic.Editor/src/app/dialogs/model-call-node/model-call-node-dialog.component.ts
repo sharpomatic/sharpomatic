@@ -35,6 +35,8 @@ export class ModelCallNodeDialogComponent implements OnInit {
   @ViewChild('detailsTab', { static: true }) detailsTab!: TemplateRef<unknown>;
   @ViewChild('inputsTab', { static: true }) inputsTab!: TemplateRef<unknown>;
   @ViewChild('outputsTab', { static: true }) outputsTab!: TemplateRef<unknown>;
+  @ViewChild('textTab', { static: true }) textTab!: TemplateRef<unknown>;
+  @ViewChild('toolCallingTab', { static: true }) toolCallingTab!: TemplateRef<unknown>;
   @ViewChild('structuredTab', { static: true }) structuredTab!: TemplateRef<unknown>;
 
   public node: ModelCallNodeEntity;
@@ -158,28 +160,7 @@ export class ModelCallNodeDialogComponent implements OnInit {
   }
 
   private updateTextFieldVisibility(): void {
-    const model = this.loadedModel;
-    const config = this.modelConfig;
-
-    if (!model || !config) {
-      this.showTextFields = false;
-      return;
-    }
-
-    const supportsTextCapability = config.capabilities.some(cap => cap.name === 'SupportsText');
-
-    if (!supportsTextCapability) {
-      this.showTextFields = false;
-      return;
-    }
-
-    if (!config.isCustom) {
-      this.showTextFields = true;
-      return;
-    }
-
-    const customCapabilities = model.customCapabilities();
-    this.showTextFields = customCapabilities.has('SupportsText');
+    this.showTextFields = this.supportsText;
   }
 
   public isCapabilityEnabled(capability: string): boolean {
@@ -308,11 +289,22 @@ export class ModelCallNodeDialogComponent implements OnInit {
   }
 
   public get supportsStructuredOutput(): boolean {
+    return this.hasCapability('SupportsStructuredOutput');
+  }
+
+  public get supportsText(): boolean {
+    return this.hasCapability('SupportsText');
+  }
+
+  public get supportsToolCalling(): boolean {
+    return this.hasCapability('SupportsToolCalling');
+  }
+
+  private hasCapability(capabilityName: string): boolean {
     if (!this.modelConfig) {
       return false;
     }
 
-    const capabilityName = 'SupportsStructuredOutput';
     const hasCapability = this.modelConfig.capabilities.some(c => c.name === capabilityName);
     if (!hasCapability) {
       return false;
@@ -343,13 +335,24 @@ export class ModelCallNodeDialogComponent implements OnInit {
   private refreshTabs(): void {
     const newTabs: TabItem[] = [
       { id: 'details', title: 'Details', content: this.detailsTab },
-      { id: 'inputs', title: 'Inputs', content: this.inputsTab },
-      { id: 'outputs', title: 'Outputs', content: this.outputsTab },
     ];
 
-    if (this.supportsStructuredOutput) {
-      newTabs.splice(1, 0, { id: 'structured', title: 'Structured Output', content: this.structuredTab });
+    if (this.supportsText) {
+      newTabs.push({ id: 'text', title: 'Text', content: this.textTab });
     }
+
+    if (this.supportsToolCalling) {
+      newTabs.push({ id: 'tool-calling', title: 'Tool Calling', content: this.toolCallingTab });
+    }
+
+    if (this.supportsStructuredOutput) {
+      newTabs.push({ id: 'structured', title: 'Structured Output', content: this.structuredTab });
+    }
+
+    newTabs.push(
+      { id: 'inputs', title: 'Inputs', content: this.inputsTab },
+      { id: 'outputs', title: 'Outputs', content: this.outputsTab },
+    );
 
     this.tabs = newTabs;
 

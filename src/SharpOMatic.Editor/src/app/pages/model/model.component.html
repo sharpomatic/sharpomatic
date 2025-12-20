@@ -65,7 +65,7 @@
 
       @if (modelConfig.isCustom) {
         <div class="mb-3 form-line">
-          <label class="form-label field-label">Capabilities</label>
+          <label class="form-label field-label align-top">Capabilities</label>
           <div class="flex-fill control-column long">
             @for (cap of capabilityEntries(); track cap.capability.name) {
               <div class="form-check">
@@ -75,7 +75,7 @@
                   [id]="'cap-' + cap.capability.name"
                   [checked]="cap.selected"
                   (change)="onCapabilityChange(cap.capability.name, $any($event.target).checked)">
-                <label class="form-check-label" [for]="'cap-' + cap.capability.name">
+                <label class="form-check-label " [for]="'cap-' + cap.capability.name">
                   {{ cap.capability.displayName }}
                 </label>
               </div>
