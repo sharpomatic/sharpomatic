@@ -296,7 +296,7 @@ export class ModelCallNodeDialogComponent implements OnInit {
   }
 
   public get supportsTextIn(): boolean {
-    return this.hasCapability('SupportsText');
+    return this.hasCapability('SupportsTextIn');
   }
 
   public get supportsTextOut(): boolean {

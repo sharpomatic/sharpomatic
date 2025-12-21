@@ -1,5 +1,6 @@
 #pragma warning disable OPENAI001
 
+using SharpOMatic.Engine.Entities.Definitions;
 using SharpOMatic.Engine.Services;
 
 namespace SharpOMatic.Engine.Nodes;
@@ -43,8 +44,8 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
         if (!connector.FieldValues.TryGetValue("apikey", out var apiKey))
             throw new SharpOMaticException("Connector api key not specified.");
 
-        if (!modelConfig.Capabilities.Any(c => c.Name == "SupportsText"))
-            throw new SharpOMaticException("Model does not support text");
+        if (!modelConfig.Capabilities.Any(c => c.Name == "SupportsTextIn"))
+            throw new SharpOMaticException("Model does not support text input.");
 
         var modelName = "";
         if (modelConfig.IsCustom)
@@ -89,6 +90,7 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
             };
         }
 
+        bool jsonOutput = false;
         if (modelConfig.Capabilities.Any(c => c.Name == "SupportsStructuredOutput") &&
             Node.ParameterValues.TryGetValue("structured_output", out var outputFormat) &&
             !string.IsNullOrWhiteSpace(outputFormat))
@@ -96,7 +98,10 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
             if (outputFormat == "Text")
                 chatOptions.ResponseFormat = ChatResponseFormat.Text;
             else if (outputFormat == "Json")
+            {
                 chatOptions.ResponseFormat = ChatResponseFormat.Json;
+                jsonOutput = true;
+            }
             else if (outputFormat == "Schema")
             {
                 if (Node.ParameterValues.TryGetValue("structured_output_schema", out var outputSchema) &&
@@ -117,6 +122,7 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
 
                     var element = JsonSerializer.Deserialize<JsonElement>(outputSchema);
                     chatOptions.ResponseFormat = ChatResponseFormat.ForJsonSchema(element, schemaName: schemaName, schemaDescription: schemaDescription);
+                    jsonOutput = true;
                 }
             }
             else if (outputFormat == "Configured Type")
@@ -133,6 +139,7 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
                     var outputSchema = RunContext.TypeSchemaService.GetSchema(configuredType);
                     var element = JsonSerializer.Deserialize<JsonElement>(outputSchema);
                     chatOptions.ResponseFormat = ChatResponseFormat.ForJsonSchema(element, schemaName: schemaName, schemaDescription: schemaDescription);
+                    jsonOutput = true;
                 }
             }
             else
@@ -173,10 +180,27 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
 
         AIAgent agent = agentClient.CreateAIAgent(instructions: instructions, services: agentServiceProvider);
         var response = await agent.RunAsync(prompt, options: new ChatClientAgentRunOptions(chatOptions));
-        
+
+
         var tempContext = new ContextObject();
         var textPath = !string.IsNullOrWhiteSpace(Node.TextOutputPath) ? Node.TextOutputPath : "output.text";
-        tempContext.Set(textPath, response.Text);
+
+        if (jsonOutput)
+        {
+            try
+            {
+                var deserializer = new FastJsonDeserializer(response.Text);
+                var objects = deserializer.Deserialize();
+                tempContext.Set(textPath, objects);
+            }
+            catch
+            {
+                throw new SharpOMaticException($"Model response could not be parsed as json.");
+            }
+        }
+        else
+            tempContext.Set(textPath, response.Text);
+
         RunContext.MergeContexts(ThreadContext.NodeContext, tempContext);
 
         return ("Model call executed", new List<NextNodeData> { new(ThreadContext, RunContext.ResolveSingleOutput(Node)) });
