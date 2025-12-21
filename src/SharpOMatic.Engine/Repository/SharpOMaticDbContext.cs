@@ -32,5 +32,19 @@ public class SharpOMaticDbContext : DbContext
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
                 entity.SetTableName($"{_options.TablePrefix}{entity.GetTableName()}");
         }
+
+        // Cascade delete: Deleting a Workflow deletes its Runs
+        modelBuilder.Entity<Run>()
+            .HasOne<Workflow>()
+            .WithMany()
+            .HasForeignKey(r => r.WorkflowId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Cascade delete: Deleting a Run deletes its Traces
+        modelBuilder.Entity<Trace>()
+            .HasOne<Run>()
+            .WithMany()
+            .HasForeignKey(t => t.RunId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

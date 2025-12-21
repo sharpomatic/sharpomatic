@@ -1,5 +1,7 @@
+# Export and Import
 
-
+- Workflows
+- Metadata
 
 # Minimum Viable Product Features
 
@@ -17,26 +19,19 @@ Max values for nodes, execution and runs to keep
   - Docusaurus setup for generated static pages site (auto build and publish on changes)
 
 - Build first version of documentation
-- Publish and announce
+
 
 # Implementation Details
 
 Improve sharpomatic setup via a builder.
-
 Add UI editor as exposed via a specified path
-
-Database
-	Add a version field to all serializable data, like workflow, connector, model, run, trace so easier to upgrade in future
-	Add indexes on fields that are part of ordering queries
-	Deleting a workflow, deletes the runs and traces for it
-	Built example connecting to SQL Server instead
 
 
 # Futures
 
-Ask for user input
-
 ChatKit output integration
+User output, as there might be a stream of outputs
+User input request, for LLM or any other part of a process
 
 Models
 	Support MCP Servers

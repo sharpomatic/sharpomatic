@@ -1,6 +1,7 @@
 ﻿
 namespace SharpOMatic.Engine.Repository;
 
+[Index(nameof(WorkflowId), nameof(Created))]
 public class Run
 {
     [Key]

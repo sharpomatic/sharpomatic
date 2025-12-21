@@ -1,5 +1,6 @@
 ﻿namespace SharpOMatic.Engine.Repository;
 
+[Index(nameof(RunId), nameof(Created))]
 public class Trace
 {
     [Key]

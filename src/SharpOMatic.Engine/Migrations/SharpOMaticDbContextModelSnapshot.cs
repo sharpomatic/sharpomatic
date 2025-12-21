@@ -144,6 +144,8 @@ namespace SharpOMatic.Engine.Migrations
 
                     b.HasKey("RunId");
 
+                    b.HasIndex("WorkflowId", "Created");
+
                     b.ToTable("Runs");
                 });
 
@@ -195,6 +197,8 @@ namespace SharpOMatic.Engine.Migrations
 
                     b.HasKey("TraceId");
 
+                    b.HasIndex("RunId", "Created");
+
                     b.ToTable("Traces");
                 });
 
@@ -226,6 +230,24 @@ namespace SharpOMatic.Engine.Migrations
                     b.HasKey("WorkflowId");
 
                     b.ToTable("Workflows");
+                });
+
+            modelBuilder.Entity("SharpOMatic.Engine.Repository.Run", b =>
+                {
+                    b.HasOne("SharpOMatic.Engine.Repository.Workflow", null)
+                        .WithMany()
+                        .HasForeignKey("WorkflowId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SharpOMatic.Engine.Repository.Trace", b =>
+                {
+                    b.HasOne("SharpOMatic.Engine.Repository.Run", null)
+                        .WithMany()
+                        .HasForeignKey("RunId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

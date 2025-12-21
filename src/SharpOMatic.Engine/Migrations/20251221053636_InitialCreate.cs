@@ -68,6 +68,22 @@ namespace SharpOMatic.Engine.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Workflows",
+                columns: table => new
+                {
+                    WorkflowId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Version = table.Column<int>(type: "INTEGER", nullable: false),
+                    Named = table.Column<string>(type: "TEXT", nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Nodes = table.Column<string>(type: "TEXT", nullable: false),
+                    Connections = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Workflows", x => x.WorkflowId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Runs",
                 columns: table => new
                 {
@@ -87,6 +103,12 @@ namespace SharpOMatic.Engine.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Runs", x => x.RunId);
+                    table.ForeignKey(
+                        name: "FK_Runs_Workflows_WorkflowId",
+                        column: x => x.WorkflowId,
+                        principalTable: "Workflows",
+                        principalColumn: "WorkflowId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,23 +133,23 @@ namespace SharpOMatic.Engine.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Traces", x => x.TraceId);
+                    table.ForeignKey(
+                        name: "FK_Traces_Runs_RunId",
+                        column: x => x.RunId,
+                        principalTable: "Runs",
+                        principalColumn: "RunId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Workflows",
-                columns: table => new
-                {
-                    WorkflowId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Version = table.Column<int>(type: "INTEGER", nullable: false),
-                    Named = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    Nodes = table.Column<string>(type: "TEXT", nullable: false),
-                    Connections = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Workflows", x => x.WorkflowId);
-                });
+            migrationBuilder.CreateIndex(
+                name: "IX_Runs_WorkflowId_Created",
+                table: "Runs",
+                columns: new[] { "WorkflowId", "Created" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Traces_RunId_Created",
+                table: "Traces",
+                columns: new[] { "RunId", "Created" });
         }
 
         /// <inheritdoc />
@@ -146,10 +168,10 @@ namespace SharpOMatic.Engine.Migrations
                 name: "ModelMetadata");
 
             migrationBuilder.DropTable(
-                name: "Runs");
+                name: "Traces");
 
             migrationBuilder.DropTable(
-                name: "Traces");
+                name: "Runs");
 
             migrationBuilder.DropTable(
                 name: "Workflows");
