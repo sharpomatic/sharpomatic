@@ -135,7 +135,7 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
 
                     var outputSchema = RunContext.SchemaTypeService.GetSchema(configuredType);
                     if (string.IsNullOrWhiteSpace(outputSchema))
-                        throw new SharpOMaticException($"Configured type '{configuredType}' not found, check it is specified in AddSchemaTypes call.");
+                        throw new SharpOMaticException($"Configured type '{configuredType}' not found, check it is specified in the AddSchemaTypes setup.");
 
                     var element = JsonSerializer.Deserialize<JsonElement>(outputSchema);
                     chatOptions.ResponseFormat = ChatResponseFormat.ForJsonSchema(element, schemaName: schemaName, schemaDescription: schemaDescription);
@@ -160,7 +160,7 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
             {
                 var toolDelegate = RunContext.ToolMethodRegistry.GetToolFromDisplayName(toolName.Trim());
                 if (toolDelegate is null)
-                    throw new SharpOMaticException($"Tool '{toolName.Trim()}' not found, check it is specified in AddToolMethods call.");
+                    throw new SharpOMaticException($"Tool '{toolName.Trim()}' not found, check it is specified in the AddToolMethods setup.");
 
                 tools.Add(AIFunctionFactory.Create(toolDelegate));
             }
@@ -172,12 +172,16 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
         OpenAIClient client = new OpenAIClient(apiKey);       
         var agentClient = client.GetOpenAIResponseClient(modelName);
 
-        var instructions = ContextHelpers.SubstituteValues(Node.Instructions, ThreadContext.NodeContext);
-        var prompt = ContextHelpers.SubstituteValues(Node.Prompt, ThreadContext.NodeContext);
+        string instructions = null;
+        if (!string.IsNullOrWhiteSpace(Node.Instructions))
+            instructions = ContextHelpers.SubstituteValues(Node.Instructions, ThreadContext.NodeContext);
+
+        string prompt = "";
+        if (!string.IsNullOrWhiteSpace(Node.Prompt))
+            prompt = ContextHelpers.SubstituteValues(Node.Prompt, ThreadContext.NodeContext);
 
         AIAgent agent = agentClient.CreateAIAgent(instructions: instructions, services: agentServiceProvider);
         var response = await agent.RunAsync(prompt, options: new ChatClientAgentRunOptions(chatOptions));
-
 
         var tempContext = new ContextObject();
         var textPath = !string.IsNullOrWhiteSpace(Node.TextOutputPath) ? Node.TextOutputPath : "output.text";

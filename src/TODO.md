@@ -1,11 +1,22 @@
 # LLM's
 
+- OpenAI
+  ToolChoice = ResponseToolChoice (none, auto, specified tool, etc) = ChatOptions ToolMode
+  ParallelToolCallsEnabled
+  FrequencyPenalty
+  PresencePenalty
+
 - Azure OpenAI - models
-- Azure AI Foundry - models
+- Microsoft Foundry - models
 
 # Workflows
 
 - Previous Runs
+
+# Conversations
+
+- ChatMessage serializable (use AIJsonUtilities.DefaultOptions), would need to update our context serializing to notice and use this for serial/deserial
+- Allow ModelCall to specify the path to get current conversation from (with create one if not present), then append call result to this same instance.
 
 # Export and Import
 
