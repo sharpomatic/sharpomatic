@@ -1,11 +1,11 @@
+# Workflows
+
+- Previous Runs
+
 # LLM's
 
 - Azure OpenAI - models
 - Microsoft Foundry - models
-
-# Workflows
-
-- Previous Runs
 
 # Conversations
 
@@ -15,7 +15,6 @@
 # Export and Import
 
 - Workflows
-- Metadata
 
 # Minimum Viable Product Features
 
