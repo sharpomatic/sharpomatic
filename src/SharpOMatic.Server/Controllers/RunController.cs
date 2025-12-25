@@ -1,3 +1,5 @@
+using SharpOMatic.Engine.Enumerations;
+
 namespace SharpOMatic.Server.Controllers;
 
 [ApiController]
@@ -23,21 +25,39 @@ public class RunController : ControllerBase
     }
 
     [HttpGet("latestforworkflow/{id}/{page}/{count}")]
-    public async Task<WorkflowRunPageResult> GetLatestRunsForWorkflow(IRepository repository, Guid id, int page, int count)
+    public async Task<WorkflowRunPageResult> GetLatestRunsForWorkflow(
+        IRepository repository,
+        Guid id,
+        int page,
+        int count,
+        [FromQuery] RunSortField sortBy = RunSortField.Created,
+        [FromQuery] SortDirection sortDirection = SortDirection.Descending)
     {
         var totalCount = await repository.GetWorkflowRuns(id).CountAsync();
         if (count < 1 || page < 1 || totalCount == 0)
             return new WorkflowRunPageResult([], totalCount);
 
         var skip = (page - 1) * count;
-        var runs = await (from r in repository.GetWorkflowRuns(id)
-                          orderby r.Created descending
-                          select r).Skip(skip).Take(count).ToListAsync();
+        var sortedRuns = GetSortedRuns(repository.GetWorkflowRuns(id), sortBy, sortDirection);
+        var runs = await sortedRuns.Skip(skip).Take(count).ToListAsync();
 
         foreach (var run in runs)
             NormalizeInputEntriesForClient(run);
 
         return new WorkflowRunPageResult(runs, totalCount);
+    }
+
+    private static IQueryable<Run> GetSortedRuns(IQueryable<Run> runs, RunSortField sortBy, SortDirection sortDirection)
+    {
+        return sortBy switch
+        {
+            RunSortField.Status => sortDirection == SortDirection.Ascending
+                ? runs.OrderBy(r => r.RunStatus).ThenByDescending(r => r.Created)
+                : runs.OrderByDescending(r => r.RunStatus).ThenByDescending(r => r.Created),
+            _ => sortDirection == SortDirection.Ascending
+                ? runs.OrderBy(r => r.Created)
+                : runs.OrderByDescending(r => r.Created),
+        };
     }
 
     private static void NormalizeInputEntriesForClient(Run run)

@@ -78,6 +78,20 @@
   border-top: 1px solid var(--bs-border-color);
 }
 
+.runs-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.runs-sort:hover,
+.runs-sort:focus {
+  text-decoration: underline;
+}
+
 .col-created {
   width: 180px;
 }

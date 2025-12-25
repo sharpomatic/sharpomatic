@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { catchError, map, Observable, of } from 'rxjs';
 import { Connector, ConnectorSnapshot } from '../metadata/definitions/connector';
@@ -15,6 +15,8 @@ import { ModelSummary, ModelSummarySnapshot } from '../metadata/definitions/mode
 import { Model, ModelSnapshot } from '../metadata/definitions/model';
 import { ToastService } from './toast.service';
 import { SettingsService } from './settings.service';
+import { RunSortField } from '../enumerations/run-sort-field';
+import { SortDirection } from '../enumerations/sort-direction';
 
 @Injectable({
   providedIn: 'root',
@@ -86,9 +88,18 @@ export class ServerRepositoryService {
     );
   }
 
-  public getLatestWorkflowRuns(id: string, page: number, count: number): Observable<WorkflowRunPageResult | null> {
+  public getLatestWorkflowRuns(
+    id: string,
+    page: number,
+    count: number,
+    sortBy: RunSortField,
+    sortDirection: SortDirection
+  ): Observable<WorkflowRunPageResult | null> {
     const apiUrl = this.settingsService.apiUrl();
-    return this.http.get<WorkflowRunPageResult>(`${apiUrl}/api/run/latestforworkflow/${id}/${page}/${count}`).pipe(
+    const params = new HttpParams()
+      .set('sortBy', sortBy)
+      .set('sortDirection', sortDirection);
+    return this.http.get<WorkflowRunPageResult>(`${apiUrl}/api/run/latestforworkflow/${id}/${page}/${count}`, { params }).pipe(
       catchError((error) => {
         this.notifyError('Loading latest workflow runs', error);
         return of(null);

@@ -11,6 +11,8 @@ import { ContextEntryListEntity, ContextEntryListSnapshot } from '../../../entit
 import { ContextEntryEntity, ContextEntrySnapshot } from '../../../entities/definitions/context-entry.entity';
 import { StartNodeEntity } from '../../../entities/definitions/start-node.entity';
 import { ToastService } from '../../../services/toast.service';
+import { RunSortField } from '../../../enumerations/run-sort-field';
+import { SortDirection } from '../../../enumerations/sort-direction';
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +29,8 @@ export class WorkflowService implements OnDestroy  {
   public runs: WritableSignal<RunProgressModel[]>;
   public runsTotal: WritableSignal<number>;
   public runsPage: WritableSignal<number>;
+  public runsSortField: WritableSignal<RunSortField>;
+  public runsSortDirection: WritableSignal<SortDirection>;
   public isRunning: WritableSignal<boolean>;
   public runInputs: WritableSignal<ContextEntryListEntity>;
   private lastStartInputsSnapshot?: ContextEntryListSnapshot;
@@ -42,6 +46,8 @@ export class WorkflowService implements OnDestroy  {
     this.runs = signal([]);
     this.runsTotal = signal(0);
     this.runsPage = signal(1);
+    this.runsSortField = signal(RunSortField.Created);
+    this.runsSortDirection = signal(SortDirection.Descending);
     this.isRunning = signal(false);
     this.runInputs = signal(ContextEntryListEntity.fromSnapshot(ContextEntryListEntity.defaultSnapshot()));
 
@@ -73,6 +79,8 @@ export class WorkflowService implements OnDestroy  {
       this.runProgress.set(undefined);
       this.runsTotal.set(0);
       this.runsPage.set(1);
+      this.runsSortField.set(RunSortField.Created);
+      this.runsSortDirection.set(SortDirection.Descending);
       this.updateRunInputsFromWorkflow();
       this.workflow().markClean();
       this.loadRunsPageForWorkflow(id, 1);
@@ -252,8 +260,29 @@ export class WorkflowService implements OnDestroy  {
     this.loadRunsPageForWorkflow(workflowId, normalizedPage);
   }
 
+  public updateRunsSort(field: RunSortField): void {
+    const workflowId = this.workflow().id;
+    if (this.runsSortField() === field) {
+      const nextDirection = this.runsSortDirection() === SortDirection.Descending
+        ? SortDirection.Ascending
+        : SortDirection.Descending;
+      this.runsSortDirection.set(nextDirection);
+    } else {
+      this.runsSortField.set(field);
+      this.runsSortDirection.set(SortDirection.Descending);
+    }
+
+    if (!workflowId) {
+      return;
+    }
+
+    this.loadRunsPageForWorkflow(workflowId, 1);
+  }
+
   private loadRunsPageForWorkflow(workflowId: string, page: number): void {
-    this.serverWorkflowService.getLatestWorkflowRuns(workflowId, page, this.runsPageSize).subscribe(result => {
+    const sortBy = this.runsSortField();
+    const sortDirection = this.runsSortDirection();
+    this.serverWorkflowService.getLatestWorkflowRuns(workflowId, page, this.runsPageSize, sortBy, sortDirection).subscribe(result => {
       if (!result) {
         this.runs.set([]);
         this.runsTotal.set(0);

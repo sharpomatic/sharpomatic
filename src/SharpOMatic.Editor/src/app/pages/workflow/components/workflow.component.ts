@@ -12,6 +12,8 @@ import { NodeType } from '../../../entities/enumerations/node-type';
 import { TabComponent, TabItem } from '../../../components/tab/tab.component';
 import { CanLeaveWithUnsavedChanges } from '../../../guards/unsaved-changes.guard';
 import { RunStatus } from '../../../enumerations/run-status';
+import { RunSortField } from '../../../enumerations/run-sort-field';
+import { SortDirection } from '../../../enumerations/sort-direction';
 import { RunProgressModel } from '../interfaces/run-progress-model';
 import { Observable } from 'rxjs';
 import { DialogService } from '../../../dialogs/services/dialog.service';
@@ -52,6 +54,8 @@ export class WorkflowComponent implements OnInit, CanLeaveWithUnsavedChanges {
   public tabs: TabItem[] = [];
   public readonly hasStartNode = computed(() => this.workflowService.workflow().nodes().some(node => node.nodeType() === NodeType.Start));
   public readonly RunStatus = RunStatus;
+  public readonly RunSortField = RunSortField;
+  public readonly SortDirection = SortDirection;
   public readonly runsPageCount = computed(() => this.workflowService.getRunsPageCount());
   public readonly runsPageNumbers = computed(() => {
     const totalPages = this.runsPageCount();
@@ -135,6 +139,10 @@ export class WorkflowComponent implements OnInit, CanLeaveWithUnsavedChanges {
     }
 
     this.workflowService.loadRunsPage(page);
+  }
+
+  onRunsSortChange(field: RunSortField): void {
+    this.workflowService.updateRunsSort(field);
   }
 
   onAddStartNode(event: Event): void {

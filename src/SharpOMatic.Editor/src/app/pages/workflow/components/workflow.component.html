@@ -86,8 +86,26 @@
         <table class="table table-sm table-striped table-hover align-middle">
           <thead>
             <tr>
-              <th scope="col" class="col-created">Created</th>
-              <th scope="col" class="col-status">Status</th>
+              <th scope="col" class="col-created">
+                <button class="btn btn-link p-0 runs-sort" type="button" (click)="onRunsSortChange(RunSortField.Created)">
+                  Created
+                  @if (workflowService.runsSortField() === RunSortField.Created) {
+                    <i class="bi"
+                      [class.bi-arrow-down]="workflowService.runsSortDirection() === SortDirection.Descending"
+                      [class.bi-arrow-up]="workflowService.runsSortDirection() === SortDirection.Ascending"></i>
+                  }
+                </button>
+              </th>
+              <th scope="col" class="col-status">
+                <button class="btn btn-link p-0 runs-sort" type="button" (click)="onRunsSortChange(RunSortField.Status)">
+                  Status
+                  @if (workflowService.runsSortField() === RunSortField.Status) {
+                    <i class="bi"
+                      [class.bi-arrow-down]="workflowService.runsSortDirection() === SortDirection.Descending"
+                      [class.bi-arrow-up]="workflowService.runsSortDirection() === SortDirection.Ascending"></i>
+                  }
+                </button>
+              </th>
               <th scope="col" class="col-duration">Duration</th>
               <th scope="col">Error</th>
             </tr>
@@ -121,7 +139,7 @@
       @if (workflowService.runsTotal() > 0) {
         <div class="d-flex align-items-center justify-content-between runs-pagination">
           <div class="text-muted small">
-            Page {{ workflowService.runsPage() }} of {{ runsPageCount() }} ({{ workflowService.runsTotal() }} total)
+            Page {{ workflowService.runsPage() }} of {{ runsPageCount() }} ({{ workflowService.runsTotal() }} total runs)
           </div>
           @if (runsPageCount() > 1) {
             <nav aria-label="Runs pagination">
