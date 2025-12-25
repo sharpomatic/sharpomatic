@@ -14,6 +14,7 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        await CheckSettings();
         await LoadMetadata();
 
         while (!stoppingToken.IsCancellationRequested)
@@ -96,6 +97,17 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
         }
     }
 
+    private static Task<List<NextNodeData>> RunNode(ThreadContext threadContext, NodeEntity node)
+    {
+        if (_nodeRunners.TryGetValue(node.NodeType, out var runnerType))
+        {
+            var runner = (IRunNode)Activator.CreateInstance(runnerType, threadContext, node)!;
+            return runner.Run();
+        }
+
+        throw new SharpOMaticException($"Unrecognized node type '{node.NodeType}'");
+    }
+
     private async Task LoadMetadata()
     {
         await LoadMetadata<ConnectorConfig>("Metadata.Resources.ConnectorConfig", (repo, config) => repo.UpsertConnectorConfig(config));
@@ -130,14 +142,10 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
         }
     }
 
-    private static Task<List<NextNodeData>> RunNode(ThreadContext threadContext, NodeEntity node)
+    private async Task CheckSettings()
     {
-        if (_nodeRunners.TryGetValue(node.NodeType, out var runnerType))
-        {
-            var runner = (IRunNode)Activator.CreateInstance(runnerType, threadContext, node)!;
-            return runner.Run();
-        }
-
-        throw new SharpOMaticException($"Unrecognized node type '{node.NodeType}'");
+        using var scope = scopeFactory.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IRepository>();
     }
+
 }

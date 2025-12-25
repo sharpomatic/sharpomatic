@@ -1,4 +1,6 @@
 using Microsoft.CodeAnalysis;
+using SharpOMatic.Engine.Entities.Definitions;
+using System.Threading.Tasks;
 
 namespace SharpOMatic.Engine.Services;
 
@@ -465,6 +467,32 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
             throw new SharpOMaticException($"Model '{modelId}' cannot be found.");
 
         dbContext.Remove(metadata);
+        await dbContext.SaveChangesAsync();
+    }
+
+    // ------------------------------------------------
+    // Setting Operations
+    // ------------------------------------------------
+
+    public IQueryable<Setting> GetSettings()
+    {
+        var dbContext = dbContextFactory.CreateDbContext();
+        return dbContext.Settings;
+    }
+
+    public async Task UpsertSetting(Setting model)
+    {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        var setting = await (from s in dbContext.Settings
+                             where s.Name == model.Name
+                             select s).FirstOrDefaultAsync();
+
+        if (setting is null)
+            dbContext.Settings.Add(model);
+        else
+            dbContext.Entry(setting).CurrentValues.SetValues(model);
+
         await dbContext.SaveChangesAsync();
     }
 }

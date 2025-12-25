@@ -53,4 +53,10 @@ public interface IRepository
     Task<Model> GetModel(Guid modelId);
     Task UpsertModel(Model model);
     Task DeleteModel(Guid modelId);
+
+    // ------------------------------------------------
+    // Setting Operations
+    // ------------------------------------------------
+    IQueryable<Setting> GetSettings();
+    Task UpsertSetting(Setting model);
 }
