@@ -14,6 +14,8 @@ import { CanLeaveWithUnsavedChanges } from '../../../guards/unsaved-changes.guar
 import { RunStatus } from '../../../enumerations/run-status';
 import { RunProgressModel } from '../interfaces/run-progress-model';
 import { Observable } from 'rxjs';
+import { DialogService } from '../../../dialogs/services/dialog.service';
+import { RunViewerDialogComponent } from '../../../dialogs/run-viewer/run-viewer-dialog.component';
 
 @Component({
   selector: 'app-workflow',
@@ -35,6 +37,7 @@ export class WorkflowComponent implements OnInit, CanLeaveWithUnsavedChanges {
 
   public readonly route = inject(ActivatedRoute);
   public readonly router = inject(Router);
+  private readonly dialogService = inject(DialogService);
   public readonly updateService = inject(DesignerUpdateService);
   public readonly workflowService = inject(WorkflowService);
   public readonly modalService = inject(BsModalService);
@@ -95,6 +98,10 @@ export class WorkflowComponent implements OnInit, CanLeaveWithUnsavedChanges {
 
   onActiveTabChange(tab: TabItem): void {
     this.updateTabRoute(tab.id);
+  }
+
+  onRunRowDoubleClick(run: RunProgressModel): void {
+    this.dialogService.open(RunViewerDialogComponent, { run });
   }
 
   onAddStartNode(event: Event): void {

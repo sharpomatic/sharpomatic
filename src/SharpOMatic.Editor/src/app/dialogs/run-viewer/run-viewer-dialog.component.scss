@@ -1,0 +1,168 @@
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
+  z-index: 1000;
+}
+
+.dialog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: stretch;
+  align-items: stretch;
+}
+
+.dialog-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.icon-sm {
+  font-size: 1.5rem;
+}
+
+.tab-shell {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+
+.run-details {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.run-property-label {
+  width: 160px;
+  white-space: nowrap;
+}
+
+.run-text {
+  padding: 2px 6px;
+  border-radius: 4px;
+
+  &.created {
+    color: black;
+    background-color: white;
+  }
+
+  &.running {
+    color: black;
+    background-color: #FF8654;
+  }
+
+  &.success {
+    color: white;
+    background-color: #198754;
+  }
+
+  &.failed {
+    color: white;
+    background-color: #FF5454;
+  }
+}
+
+.header-separator {
+  padding: 0;
+  margin: 0;
+}
+
+.run-error-text {
+  padding: 10px;
+}
+
+.trace-line {
+  margin: 4px;
+}
+
+.trace-symbol {
+  padding: 1px 6px;
+  font-size: 17px;
+}
+
+.trace-title {
+  padding: 1px 6px;
+  display: inline-block;
+  width: 100px;
+}
+
+.trace-message {
+  display: inline-block;
+}
+
+.trace-text {
+  padding: 2px 6px;
+  border-radius: 4px;
+
+  &.running {
+    color: black;
+    background-color: #FF8654;
+  }
+
+  &.success {
+    color: white;
+    background-color: #198754;
+  }
+
+  &.failed {
+    color: white;
+    background-color: #FF5454;
+  }
+}
+
+.run-inputs {
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.run-input-row input[readonly],
+.run-input-row textarea[readonly] {
+  background-color: var(--bs-tertiary-bg);
+}
+
+.input-empty-state {
+  padding: 12px;
+}
+
+.editPath {
+  min-width: 300px;
+  max-width: 300px;
+  width: 300px;
+}
+
+.editType {
+  min-width: 140px;
+  max-width: 140px;
+  width: 140px;
+}
+
+.editValue {
+  min-width: 300px;
+  width: 100%;
+}
+
+.editJson {
+  height: 160px;
+}
+
+.editExpression {
+  height: 100px;
+}
+
+.editBoolValue {
+  width: 120px;
+  flex: 0 0 auto;
+}

@@ -99,7 +99,7 @@
               </tr>
             } @else {
               @for (run of workflowService.runs(); track run.runId) {
-                <tr>
+                <tr class="run-row" (dblclick)="onRunRowDoubleClick(run)">
                   <td class="col-created">{{ run.created ? (run.created | date:'yyyy-MM-dd HH:mm:ss') : '-' }}</td>
                   <td class="col-status">
                     <span class="run-text" 
