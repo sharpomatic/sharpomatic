@@ -140,20 +140,27 @@ export class RunViewerDialogComponent implements OnInit {
 
   private formatDuration(started?: string | null, stopped?: string | null): string {
     if (!started || !stopped) {
-      return '-';
+      return '';
     }
 
     const startedMs = Date.parse(started);
     const stoppedMs = Date.parse(stopped);
     if (!Number.isFinite(startedMs) || !Number.isFinite(stoppedMs) || stoppedMs < startedMs) {
-      return '-';
+      return '';
     }
 
-    const totalSeconds = Math.floor((stoppedMs - startedMs) / 1000);
+    const durationMs = stoppedMs - startedMs;
+    if (durationMs <= 0) {
+      return '';
+    }
+
+    const roundedMs = Math.ceil(durationMs / 10) * 10;
+    const totalSeconds = Math.floor(roundedMs / 1000);
+    const hundredths = Math.floor((roundedMs % 1000) / 10);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+    return `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}.${this.pad(hundredths)}`;
   }
 
   private formatRunStatus(status: RunStatus): string {

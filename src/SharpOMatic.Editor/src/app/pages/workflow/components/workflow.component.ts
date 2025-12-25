@@ -137,11 +137,18 @@ export class WorkflowComponent implements OnInit, CanLeaveWithUnsavedChanges {
       return '';
     }
 
-    const totalSeconds = Math.floor((stoppedMs - startedMs) / 1000);
+    const durationMs = stoppedMs - startedMs;
+    if (durationMs <= 0) {
+      return '';
+    }
+
+    const roundedMs = Math.ceil(durationMs / 10) * 10;
+    const totalSeconds = Math.floor(roundedMs / 1000);
+    const hundredths = Math.floor((roundedMs % 1000) / 10);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${hundredths.toString().padStart(2, '0')}`;
   }
 
   private resolveTabId(tabId: string | null): string {
