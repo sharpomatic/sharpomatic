@@ -12,8 +12,8 @@ public static class ServiceCollectionExtensions
 
         // Add mandatory services
         services.TryAddSingleton<ICodeCheck, CodeCheckService>();
-        services.TryAddSingleton<IRepository, RepositoryService>();
-        services.TryAddSingleton<IEngine, EngineService>();
+        services.TryAddScoped<IRepository, RepositoryService>();
+        services.TryAddScoped<IEngine, EngineService>();
         services.TryAddSingleton<INodeQueue, NodeQueueService>();
         services.TryAddSingleton<IRunNodeFactory, RunNodeFactory>();
         services.TryAddSingleton<IRunContextFactory, RunContextFactory>();

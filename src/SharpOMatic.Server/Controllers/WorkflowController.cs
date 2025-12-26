@@ -13,15 +13,7 @@ public class WorkflowController : ControllerBase
     [HttpGet]
     public Task<List<WorkflowEditSummary>> GetWorkflowEditSummaries(IRepository repository)
     {
-        return (from w in repository.GetWorkflows()
-                orderby w.Named
-                select new WorkflowEditSummary()
-                {
-                    Version = w.Version,
-                    Id = w.WorkflowId,
-                    Name = w.Named,
-                    Description = w.Description,
-                }).ToListAsync();
+        return repository.GetWorkflowEditSummaries();
     }
 
     [HttpGet("{id}")]

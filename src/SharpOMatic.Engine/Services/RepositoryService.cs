@@ -17,10 +17,19 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
     // ------------------------------------------------
     // Workflow Operations
     // ------------------------------------------------
-    public IQueryable<Workflow> GetWorkflows()
+    public async Task<List<WorkflowEditSummary>> GetWorkflowEditSummaries()
     {
-        var dbContext = dbContextFactory.CreateDbContext();
-        return dbContext.Workflows;
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return await (from w in dbContext.Workflows.AsNoTracking()
+                      orderby w.Named
+                      select new WorkflowEditSummary()
+                      {
+                          Version = w.Version,
+                          Id = w.WorkflowId,
+                          Name = w.Named,
+                          Description = w.Description,
+                      }).ToListAsync();
     }
 
     public async Task<WorkflowEntity> GetWorkflow(Guid workflowId)
@@ -93,18 +102,41 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
     // ------------------------------------------------
     // Run Operations
     // ------------------------------------------------
-    public IQueryable<Run> GetRuns()
+    public async Task<Run?> GetLatestRunForWorkflow(Guid workflowId)
     {
-        var dbContext = dbContextFactory.CreateDbContext();
-        return dbContext.Runs;
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return await dbContext.Runs.AsNoTracking()
+            .Where(r => r.WorkflowId == workflowId)
+            .OrderByDescending(r => r.Created)
+            .FirstOrDefaultAsync();
     }
 
-    public IQueryable<Run> GetWorkflowRuns(Guid workflowId)
+    public async Task<int> GetWorkflowRunCount(Guid workflowId)
     {
-        var dbContext = dbContextFactory.CreateDbContext();
-        return (from r in dbContext.Runs
-                where r.WorkflowId == workflowId
-                select r);
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return await dbContext.Runs.AsNoTracking()
+            .Where(r => r.WorkflowId == workflowId)
+            .CountAsync();
+    }
+
+    public async Task<List<Run>> GetWorkflowRuns(Guid workflowId, RunSortField sortBy, SortDirection sortDirection, int skip, int take)
+    {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        var runs = dbContext.Runs.AsNoTracking()
+            .Where(r => r.WorkflowId == workflowId);
+
+        var sortedRuns = GetSortedRuns(runs, sortBy, sortDirection);
+
+        if (skip > 0)
+            sortedRuns = sortedRuns.Skip(skip);
+
+        if (take > 0)
+            sortedRuns = sortedRuns.Take(take);
+
+        return await sortedRuns.ToListAsync();
     }
 
     public async Task UpsertRun(Run run)
@@ -141,23 +173,31 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
             .ExecuteDeleteAsync();
     }
 
+    private static IQueryable<Run> GetSortedRuns(IQueryable<Run> runs, RunSortField sortBy, SortDirection sortDirection)
+    {
+        return sortBy switch
+        {
+            RunSortField.Status => sortDirection == SortDirection.Ascending
+                ? runs.OrderBy(r => r.RunStatus).ThenByDescending(r => r.Created)
+                : runs.OrderByDescending(r => r.RunStatus).ThenByDescending(r => r.Created),
+            _ => sortDirection == SortDirection.Ascending
+                ? runs.OrderBy(r => r.Created)
+                : runs.OrderByDescending(r => r.Created),
+        };
+    }
+
 
     // ------------------------------------------------
     // Trace Operations
     // ------------------------------------------------
-    public IQueryable<Trace> GetTraces()
+    public async Task<List<Trace>> GetRunTraces(Guid runId)
     {
-        var dbContext = dbContextFactory.CreateDbContext();
-        return dbContext.Traces;
-    }
+        using var dbContext = dbContextFactory.CreateDbContext();
 
-    public IQueryable<Trace> GetRunTraces(Guid runId)
-    {
-        var dbContext = dbContextFactory.CreateDbContext();
-
-        return (from t in dbContext.Traces
-                where t.RunId == runId
-                select t);
+        return await (from t in dbContext.Traces.AsNoTracking()
+                      where t.RunId == runId
+                      orderby t.Created
+                      select t).ToListAsync();
     }
 
     public async Task UpsertTrace(Trace trace)
@@ -181,7 +221,7 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
     // ------------------------------------------------
     public async Task<ConnectorConfig?> GetConnectorConfig(string configId)
     {
-        var dbContext = dbContextFactory.CreateDbContext();
+        using var dbContext = dbContextFactory.CreateDbContext();
 
         var metadata = await (from c in dbContext.ConnectorConfigMetadata
                               where c.ConfigId == configId
@@ -196,7 +236,7 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
 
     public async Task<List<ConnectorConfig>> GetConnectorConfigs()
     {
-        var dbContext = dbContextFactory.CreateDbContext();
+        using var dbContext = dbContextFactory.CreateDbContext();
 
         var entries = await dbContext.ConnectorConfigMetadata.AsNoTracking().ToListAsync();
 
@@ -238,10 +278,18 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
     // ------------------------------------------------
     // Connector Operations
     // ------------------------------------------------
-    public IQueryable<ConnectorMetadata> GetConnectors()
+    public async Task<List<ConnectorSummary>> GetConnectorSummaries()
     {
-        var dbContext = dbContextFactory.CreateDbContext();
-        return dbContext.ConnectorMetadata;
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return await (from c in dbContext.ConnectorMetadata.AsNoTracking()
+                      orderby c.Name
+                      select new ConnectorSummary()
+                      {
+                          ConnectorId = c.ConnectorId,
+                          Name = c.Name,
+                          Description = c.Description,
+                      }).ToListAsync();
     }
 
     public async Task<Connector> GetConnector(Guid connectorId, bool hideSecrets = true)
@@ -350,7 +398,7 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
     // ------------------------------------------------
     public async Task<ModelConfig?> GetModelConfig(string configId)
     {
-        var dbContext = dbContextFactory.CreateDbContext();
+        using var dbContext = dbContextFactory.CreateDbContext();
 
         var metadata = await (from m in dbContext.ModelConfigMetadata
                               where m.ConfigId == configId
@@ -365,7 +413,7 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
 
     public async Task<List<ModelConfig>> GetModelConfigs()
     {
-        var dbContext = dbContextFactory.CreateDbContext();
+        using var dbContext = dbContextFactory.CreateDbContext();
 
         var entries = await dbContext.ModelConfigMetadata.AsNoTracking().ToListAsync();
 
@@ -407,10 +455,18 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
     // ------------------------------------------------
     // Model Operations
     // ------------------------------------------------
-    public IQueryable<ModelMetadata> GetModels()
+    public async Task<List<ModelSummary>> GetModelSummaries()
     {
-        var dbContext = dbContextFactory.CreateDbContext();
-        return dbContext.ModelMetadata;
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return await (from m in dbContext.ModelMetadata.AsNoTracking()
+                      orderby m.Name
+                      select new ModelSummary()
+                      {
+                          ModelId = m.ModelId,
+                          Name = m.Name,
+                          Description = m.Description,
+                      }).ToListAsync();
     }
 
     public async Task<Model> GetModel(Guid modelId)
@@ -492,10 +548,22 @@ public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContext
     // Setting Operations
     // ------------------------------------------------
 
-    public IQueryable<Setting> GetSettings()
+    public async Task<List<Setting>> GetSettings()
     {
-        var dbContext = dbContextFactory.CreateDbContext();
-        return dbContext.Settings;
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return await (from s in dbContext.Settings.AsNoTracking()
+                      orderby s.Name
+                      select s).ToListAsync();
+    }
+
+    public async Task<Setting?> GetSetting(string name)
+    {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return await (from s in dbContext.Settings.AsNoTracking()
+                      where s.Name == name
+                      select s).FirstOrDefaultAsync();
     }
 
     public async Task UpsertSetting(Setting model)

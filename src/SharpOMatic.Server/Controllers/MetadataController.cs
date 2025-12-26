@@ -13,14 +13,7 @@ public class MetadataController(IRepository repository) : ControllerBase
     [HttpGet("connectors")]
     public Task<List<ConnectorSummary>> GetConnectorSummaries(IRepository repository)
     {
-        return (from c in repository.GetConnectors()
-                orderby c.Name
-                select new ConnectorSummary()
-                {
-                    ConnectorId = c.ConnectorId,
-                    Name = c.Name,
-                    Description = c.Description,
-                }).ToListAsync();
+        return repository.GetConnectorSummaries();
     }
 
     [HttpGet("connectors/{id}")]
@@ -50,14 +43,7 @@ public class MetadataController(IRepository repository) : ControllerBase
     [HttpGet("models")]
     public Task<List<ModelSummary>> GetModelSummaries(IRepository repository)
     {
-        return (from m in repository.GetModels()
-                orderby m.Name
-                select new ModelSummary()
-                {
-                    ModelId = m.ModelId,
-                    Name = m.Name,
-                    Description = m.Description,
-                }).ToListAsync();
+        return repository.GetModelSummaries();
     }
 
     [HttpGet("models/{id}")]

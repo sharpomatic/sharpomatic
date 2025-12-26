@@ -115,9 +115,7 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
     {
         try
         {
-            var runHistoryLimitSetting = await runContext.Repository.GetSettings()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(s => s.Name == "RunHistoryLimit");
+            var runHistoryLimitSetting = await runContext.Repository.GetSetting("RunHistoryLimit");
 
             var runHistoryLimit = runHistoryLimitSetting?.ValueInteger ?? DEFAULT_RUN_HISTORY_LIMIT;
             if (runHistoryLimit < 0)
@@ -167,7 +165,7 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
     {
         using var scope = scopeFactory.CreateScope();
         var repository = scope.ServiceProvider.GetRequiredService<IRepository>();
-        var versionSetting = await repository.GetSettings().FirstOrDefaultAsync(s => s.Name == "Version");
+        var versionSetting = await repository.GetSetting("Version");
 
         if (versionSetting is null)
         {

@@ -7,9 +7,7 @@ public class SettingController : ControllerBase
     [HttpGet]
     public async Task<List<Setting>> GetSettings(IRepository repository)
     {
-        return await (from s in repository.GetSettings()
-                      orderby s.Name
-                      select s).ToListAsync();
+        return await repository.GetSettings();
     }
 
     [HttpPost]

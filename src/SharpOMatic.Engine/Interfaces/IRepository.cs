@@ -5,7 +5,7 @@ public interface IRepository
     // ------------------------------------------------
     // Workflow Operations
     // ------------------------------------------------
-    IQueryable<Workflow> GetWorkflows();
+    Task<List<WorkflowEditSummary>> GetWorkflowEditSummaries();
     Task<WorkflowEntity> GetWorkflow(Guid workflowId);
     Task UpsertWorkflow(WorkflowEntity workflow);
     Task DeleteWorkflow(Guid workflowId);
@@ -13,16 +13,16 @@ public interface IRepository
     // ------------------------------------------------
     // Run Operations
     // ------------------------------------------------
-    IQueryable<Run> GetRuns();
-    IQueryable<Run> GetWorkflowRuns(Guid workflowId);
+    Task<Run?> GetLatestRunForWorkflow(Guid workflowId);
+    Task<int> GetWorkflowRunCount(Guid workflowId);
+    Task<List<Run>> GetWorkflowRuns(Guid workflowId, RunSortField sortBy, SortDirection sortDirection, int skip, int take);
     Task UpsertRun(Run run);
     Task PruneWorkflowRuns(Guid workflowId, int keepLatest);
 
     // ------------------------------------------------
     // Trace Operations
     // ------------------------------------------------
-    IQueryable<Trace> GetTraces();
-    IQueryable<Trace> GetRunTraces(Guid runId);
+    Task<List<Trace>> GetRunTraces(Guid runId);
     Task UpsertTrace(Trace trace);
 
     // ------------------------------------------------
@@ -35,7 +35,7 @@ public interface IRepository
     // ------------------------------------------------
     // Connector Operations
     // ------------------------------------------------
-    IQueryable<ConnectorMetadata> GetConnectors();
+    Task<List<ConnectorSummary>> GetConnectorSummaries();
     Task<Connector> GetConnector(Guid connectionId, bool hideSecrets = true);
     Task UpsertConnector(Connector connection, bool hideSecrets = true);
     Task DeleteConnector(Guid connectionId);
@@ -50,7 +50,7 @@ public interface IRepository
     // ------------------------------------------------
     // Model Operations
     // ------------------------------------------------
-    IQueryable<ModelMetadata> GetModels();
+    Task<List<ModelSummary>> GetModelSummaries();
     Task<Model> GetModel(Guid modelId);
     Task UpsertModel(Model model);
     Task DeleteModel(Guid modelId);
@@ -58,6 +58,7 @@ public interface IRepository
     // ------------------------------------------------
     // Setting Operations
     // ------------------------------------------------
-    IQueryable<Setting> GetSettings();
+    Task<List<Setting>> GetSettings();
+    Task<Setting?> GetSetting(string name);
     Task UpsertSetting(Setting model);
 }

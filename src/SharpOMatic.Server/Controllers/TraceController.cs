@@ -7,8 +7,6 @@ public class TraceController : ControllerBase
     [HttpGet("forrun/{id}")]
     public async Task<IEnumerable<Trace>> GetRunTraces(IRepository repository, Guid id)
     {
-        return await (from t in repository.GetRunTraces(id)
-                      orderby t.Created
-                      select t).ToListAsync();
+        return await repository.GetRunTraces(id);
     }
 }
