@@ -15,6 +15,8 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IRepository, RepositoryService>();
         services.TryAddSingleton<IEngine, EngineService>();
         services.TryAddSingleton<INodeQueue, NodeQueueService>();
+        services.TryAddSingleton<IRunNodeFactory, RunNodeFactory>();
+        services.TryAddSingleton<IRunContextFactory, RunContextFactory>();
         services.AddHostedService<NodeExecutionService>();
 
         // Add empty versions of optional services

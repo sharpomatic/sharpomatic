@@ -24,16 +24,20 @@ public class RunContext
     public int RunNodeLimit => _runNodeLimit;
 
     public RunContext(IServiceScope serviceScope,
+                      IRepository repository,
+                      INotification notifications,
+                      IToolMethodRegistry toolMethodRegistry,
+                      ISchemaTypeService schemaTypeService,
                       IEnumerable<JsonConverter> jsonConverters,
-                      WorkflowEntity workflow, 
+                      WorkflowEntity workflow,
                       Run run,
                       int runNodeLimit)
     {
         ServiceScope = serviceScope;
-        Repository = serviceScope.ServiceProvider.GetRequiredService<IRepository>();
-        Notifications = serviceScope.ServiceProvider.GetRequiredService<INotification>();
-        ToolMethodRegistry = serviceScope.ServiceProvider.GetRequiredService<IToolMethodRegistry>();
-        SchemaTypeService = serviceScope.ServiceProvider.GetRequiredService<ISchemaTypeService>();
+        Repository = repository;
+        Notifications = notifications;
+        ToolMethodRegistry = toolMethodRegistry;
+        SchemaTypeService = schemaTypeService;
         JsonConverters = jsonConverters;
         Workflow = workflow;
         Run = run;

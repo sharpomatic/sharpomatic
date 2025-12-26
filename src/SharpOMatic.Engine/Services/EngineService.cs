@@ -1,8 +1,8 @@
 ﻿namespace SharpOMatic.Engine.Services;
 
-public class EngineService(IServiceProvider ServiceProvider,
-                           INodeQueue Queue,
+public class EngineService(INodeQueue Queue,
                            IRepository Repository,
+                           IRunContextFactory RunContextFactory,
                            IJsonConverterService? JsonConverterService = null) : IEngine
 {
     public async Task<Guid> RunWorkflow(Guid workflowId, ContextObject? nodeContext = null, ContextEntryListEntity? inputEntries = null)
@@ -43,7 +43,7 @@ public class EngineService(IServiceProvider ServiceProvider,
         var nodeRunLimitSetting = await Repository.GetSettings().FirstOrDefaultAsync(s => s.Name == "RunNodeLimit");
         var nodeRunLimit = nodeRunLimitSetting?.ValueInteger ?? NodeExecutionService.DEFAULT_NODE_RUN_LIMIT;
 
-        var runContext = new RunContext(ServiceProvider.CreateScope(), converters, workflow, run, nodeRunLimit);
+        var runContext = RunContextFactory.Create(workflow, run, converters, nodeRunLimit);
         var threadContext = new ThreadContext(runContext, nodeContext);
 
         await runContext.RunUpdated();

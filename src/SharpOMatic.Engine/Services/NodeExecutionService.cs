@@ -1,19 +1,11 @@
 namespace SharpOMatic.Engine.Services;
 
-public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFactory) : BackgroundService
+public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFactory, IRunNodeFactory runNodeFactory) : BackgroundService
 {
     public const int DEFAULT_RUN_HISTORY_LIMIT = 50;
     public const int DEFAULT_NODE_RUN_LIMIT = 500;
 
-    private static readonly Dictionary<NodeType, Type> _nodeRunners;
     private readonly SemaphoreSlim _semaphore = new(5);
-
-    static NodeExecutionService()
-    {
-        _nodeRunners = Assembly.GetExecutingAssembly().GetTypes()
-            .Where(t => t.GetCustomAttribute<RunNodeAttribute>() != null)
-            .ToDictionary(t => t.GetCustomAttribute<RunNodeAttribute>()!.NodeType, t => t);
-    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -113,15 +105,10 @@ public class NodeExecutionService(INodeQueue queue, IServiceScopeFactory scopeFa
         }
     }
 
-    private static Task<List<NextNodeData>> RunNode(ThreadContext threadContext, NodeEntity node)
+    private Task<List<NextNodeData>> RunNode(ThreadContext threadContext, NodeEntity node)
     {
-        if (_nodeRunners.TryGetValue(node.NodeType, out var runnerType))
-        {
-            var runner = (IRunNode)Activator.CreateInstance(runnerType, threadContext, node)!;
-            return runner.Run();
-        }
-
-        throw new SharpOMaticException($"Unrecognized node type '{node.NodeType}'");
+        var runner = runNodeFactory.Create(threadContext, node);
+        return runner.Run();
     }
 
     private async Task PruneRunHistory(RunContext runContext)
