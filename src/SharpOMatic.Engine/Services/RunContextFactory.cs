@@ -6,7 +6,8 @@ public class RunContextFactory(IServiceScopeFactory scopeFactory) : IRunContextF
         WorkflowEntity workflow,
         Run run,
         IEnumerable<JsonConverter> jsonConverters,
-        int runNodeLimit)
+        int runNodeLimit,
+        TaskCompletionSource<Run>? completionSource)
     {
         var scope = scopeFactory.CreateScope();
 
@@ -26,6 +27,7 @@ public class RunContextFactory(IServiceScopeFactory scopeFactory) : IRunContextF
             jsonConverters,
             workflow,
             run,
-            runNodeLimit);
+            runNodeLimit,
+            completionSource);
     }
 }

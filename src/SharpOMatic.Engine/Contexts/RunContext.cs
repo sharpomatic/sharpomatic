@@ -7,6 +7,7 @@ public class RunContext
     private readonly Dictionary<Guid, NodeEntity> _ouputConnectorToNode = [];
     private readonly Dictionary<Guid, NodeEntity> _inputConnectorToNode = [];
     private readonly Dictionary<Guid, ConnectionEntity> _fromToConnection = [];
+    private TaskCompletionSource<Run>? _completionSource;
 
     private int _threadId = 1;
     private int _threadCount = 1;
@@ -25,6 +26,7 @@ public class RunContext
     public int RunningThreadCount => _threadCount;
     public int NodesRun => Volatile.Read(ref _nodesRun);
     public int RunNodeLimit => _runNodeLimit;
+    public TaskCompletionSource<Run>? CompletionSource { get; init; }
 
     public RunContext(IServiceScope serviceScope,
                       IRepositoryService repositoryService,
@@ -35,7 +37,8 @@ public class RunContext
                       IEnumerable<JsonConverter> jsonConverters,
                       WorkflowEntity workflow,
                       Run run,
-                      int runNodeLimit)
+                      int runNodeLimit,
+                      TaskCompletionSource<Run>? completionSource)
     {
         ServiceScope = serviceScope;
         RepositoryService = repositoryService;
@@ -47,6 +50,7 @@ public class RunContext
         Workflow = workflow;
         Run = run;
         _runNodeLimit = runNodeLimit;
+        CompletionSource = CompletionSource;
 
         foreach (var node in workflow.Nodes)
         {
@@ -100,6 +104,14 @@ public class RunContext
     {
         await RepositoryService.UpsertRun(Run);
         await NotificationService.RunProgress(Run);
+        if (Run.RunStatus is RunStatus.Success or RunStatus.Failed)
+            CompleteRun();
+    }
+
+    private void CompleteRun()
+    {
+        var completionSource = Interlocked.Exchange(ref _completionSource, null);
+        completionSource?.TrySetResult(Run);
     }
 
     public NodeEntity ResolveSingleOutput(NodeEntity node)

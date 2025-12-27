@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace SharpOMatic.Engine.Interfaces;
 
 public interface IRunContextFactory
@@ -6,5 +8,6 @@ public interface IRunContextFactory
         WorkflowEntity workflow,
         Run run,
         IEnumerable<JsonConverter> jsonConverters,
-        int runNodeLimit);
+        int runNodeLimit,
+        TaskCompletionSource<Run>? completionSource);
 }

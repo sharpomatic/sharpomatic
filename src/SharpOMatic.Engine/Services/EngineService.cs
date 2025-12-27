@@ -1,4 +1,6 @@
-﻿namespace SharpOMatic.Engine.Services;
+﻿using SharpOMatic.Engine.Interfaces;
+
+namespace SharpOMatic.Engine.Services;
 
 public class EngineService(INodeQueueService QueueService,
                            IRepositoryService RepositoryService,
@@ -6,7 +8,32 @@ public class EngineService(INodeQueueService QueueService,
                            IScriptOptionsService ScriptOptionsService,
                            IJsonConverterService JsonConverterService) : IEngineService
 {
-    public async Task<Guid> RunWorkflow(Guid workflowId, ContextObject? nodeContext = null, ContextEntryListEntity? inputEntries = null)
+    public async Task<Guid> RunWorkflowAndNotify(Guid workflowId, ContextObject? nodeContext = null, ContextEntryListEntity? inputEntries = null)
+    {
+        var runContext = await CreateRunContextAndQueue(workflowId, nodeContext, inputEntries, null);
+        return runContext.Run.RunId;
+    }
+
+    public async Task<Run> RunWorkflowAndWait(
+        Guid workflowId,
+        ContextObject? nodeContext = null,
+        ContextEntryListEntity? inputEntries = null)
+    {
+        var completionSource = new TaskCompletionSource<Run>(TaskCreationOptions.RunContinuationsAsynchronously);
+        await CreateRunContextAndQueue(workflowId, nodeContext, inputEntries, completionSource);
+        return await completionSource.Task.ConfigureAwait(false);
+    }
+
+    public Run RunWorkflowSynchronously(Guid workflowId, ContextObject? context = null, ContextEntryListEntity? inputEntries = null)
+    {
+        return RunWorkflowAndWait(workflowId, context, inputEntries).GetAwaiter().GetResult();
+    }
+
+    private async Task<RunContext> CreateRunContextAndQueue(
+        Guid workflowId,
+        ContextObject? nodeContext,
+        ContextEntryListEntity? inputEntries,
+        TaskCompletionSource<Run>? completionSource)
     {
         nodeContext ??= [];
 
@@ -44,12 +71,13 @@ public class EngineService(INodeQueueService QueueService,
         var nodeRunLimitSetting = await RepositoryService.GetSetting("RunNodeLimit");
         var nodeRunLimit = nodeRunLimitSetting?.ValueInteger ?? NodeExecutionService.DEFAULT_NODE_RUN_LIMIT;
 
-        var runContext = RunContextFactory.Create(workflow, run, converters, nodeRunLimit);
+        var runContext = RunContextFactory.Create(workflow, run, converters, nodeRunLimit, completionSource);
         var threadContext = new ThreadContext(runContext, nodeContext);
 
         await runContext.RunUpdated();
 
         QueueService.Enqueue(threadContext, currentNodes[0]);
-        return run.RunId;
+
+        return runContext;
     }
 }
