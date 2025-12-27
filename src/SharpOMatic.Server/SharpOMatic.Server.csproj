@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SharpOMatic.Editor.Hosting\SharpOMatic.Editor.Hosting.csproj" />
     <ProjectReference Include="..\SharpOMatic.Engine\SharpOMatic.Engine.csproj" />
   </ItemGroup>
 

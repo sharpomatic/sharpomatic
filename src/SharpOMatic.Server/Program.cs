@@ -1,3 +1,4 @@
+using SharpOMatic.Editor.Hosting;
 using SharpOMatic.Server;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -58,6 +59,7 @@ app.Use(async (context, next) =>
 });
 
 app.MapControllers();
+app.MapSharpOMaticEditor("/");
 app.MapHub<NotificationHub>("/notifications");
 app.Run();
 
