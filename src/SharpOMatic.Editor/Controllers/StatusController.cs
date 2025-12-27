@@ -1,4 +1,4 @@
-﻿namespace SharpOMatic.Server.Controllers;
+namespace SharpOMatic.Editor.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

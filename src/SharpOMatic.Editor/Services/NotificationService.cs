@@ -1,6 +1,4 @@
-using SharpOMatic.Engine.Interfaces;
-
-namespace SharpOMatic.Server.Services;
+namespace SharpOMatic.Editor.Services;
 
 public class NotificationService(IHubContext<NotificationHub> hubContext) : INotification
 {

@@ -29,9 +29,9 @@
 
 # Implementation Details
 
-Package the editor in a package that can be added with extension method
-Add UI editor as exposed via a specified path
-
+Move the notification interface and signal into the editor package
+Output the editor and engine as nuget packages
+GitHub build pipeline to build/package and publish to nuget the two packages
 
 # Futures
 

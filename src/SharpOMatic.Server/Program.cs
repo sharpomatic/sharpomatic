@@ -5,15 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.UseUrls("http://localhost:9001");
 builder.Services.AddCors();
-builder.Services.AddControllers().AddJsonOptions(options => 
-{
-    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
-    options.JsonSerializerOptions.Converters.Add(new NodeEntityConverter());
-});
-builder.Services.AddSignalR();
-builder.Services.AddSingleton<INotification, NotificationService>();
-builder.Services.AddSingleton<IClockService, ClockService>();
-builder.Services.AddSharpOMatic()
+builder.Services.AddSharpOMaticEditor();
+builder.Services.AddSharpOMaticEngine()
     .AddSchemaTypes(typeof(TriviaResponse), typeof(StringList))
     .AddToolMethods(Tools.GetGreeting, Tools.GetTime)
     .AddScriptOptions([typeof(ServerHelper).Assembly], ["SharpOMatic.Server"])
@@ -58,8 +51,6 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.MapControllers();
 app.MapSharpOMaticEditor("/editor");
-app.MapHub<NotificationHub>("/notifications");
 app.Run();
 

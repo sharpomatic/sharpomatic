@@ -4,6 +4,24 @@ public static class SharpOMaticEditorExtensions
 {
     private const string DefaultBaseHref = "<base href=\"/\">";
 
+    public static IServiceCollection AddSharpOMaticEditor(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddControllers()
+            .AddApplicationPart(typeof(SharpOMaticEditorExtensions).Assembly)
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                options.JsonSerializerOptions.Converters.Add(new NodeEntityConverter());
+            });
+
+        services.AddSignalR();
+        services.AddSingleton<INotification, NotificationService>();
+
+        return services;
+    }
+
     public static WebApplication MapSharpOMaticEditor(this WebApplication app, string path = "/editor")
     {
         ArgumentNullException.ThrowIfNull(app);
@@ -18,21 +36,31 @@ public static class SharpOMaticEditorExtensions
         var fileProvider = new ManifestEmbeddedFileProvider(typeof(SharpOMaticEditorExtensions).Assembly, "wwwroot");
         var indexHtml = LoadIndexHtml(fileProvider, normalizedPath);
 
-        app.Map(normalizedPath, editorApp =>
+        app.UseStaticFiles(new StaticFileOptions
         {
-            editorApp.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = fileProvider
-            });
-
-            editorApp.Run(async context =>
-            {
-                context.Response.ContentType = "text/html; charset=utf-8";
-                await context.Response.WriteAsync(indexHtml);
-            });
+            FileProvider = fileProvider,
+            RequestPath = normalizedPath
         });
 
+        var editorGroup = app.MapGroup(normalizedPath);
+        editorGroup.MapControllers();
+        editorGroup.MapHub<NotificationHub>("/notifications");
+
+        MapEditorFallback(app, normalizedPath, indexHtml);
+
         return app;
+    }
+
+    private static void MapEditorFallback(WebApplication app, string basePath, string indexHtml)
+    {
+        var fallbackTask = new Func<HttpContext, Task>(context =>
+        {
+            context.Response.ContentType = "text/html; charset=utf-8";
+            return context.Response.WriteAsync(indexHtml);
+        });
+
+        app.MapFallback(basePath, fallbackTask);
+        app.MapFallback($"{basePath}/{{*path:nonfile}}", fallbackTask);
     }
 
     private static string LoadIndexHtml(IFileProvider fileProvider, string basePath)
@@ -61,7 +89,6 @@ public static class SharpOMaticEditorExtensions
         var baseTag = $"<base href=\"{normalizedBase}\">{Environment.NewLine}";
         return html.Insert(index, baseTag);
     }
-
 
     private static string NormalizePath(string path)
     {

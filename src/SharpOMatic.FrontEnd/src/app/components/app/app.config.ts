@@ -14,9 +14,19 @@ export function initializeMonacoService(monacoGlobalService: MonacoService) {
   };
 }
 
+export function resolveApiUrl(): string {
+  const baseUri = new URL(document.baseURI);
+  const normalizedPath = baseUri.pathname.replace(/\/$/, '');
+  if (normalizedPath.length > 0 && normalizedPath !== '/') {
+    return `${baseUri.origin}${normalizedPath}`;
+  }
+
+  return 'http://localhost:9001';
+}
+
 export const appConfig: ApplicationConfig = {
   providers: [
-    { provide: API_URL, useValue: 'http://localhost:9001' },
+    { provide: API_URL, useFactory: resolveApiUrl },
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(),
     provideZoneChangeDetection({ eventCoalescing: true }),

@@ -1,6 +1,6 @@
 using SharpOMatic.Engine.Enumerations;
 
-namespace SharpOMatic.Server.Controllers;
+namespace SharpOMatic.Editor.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

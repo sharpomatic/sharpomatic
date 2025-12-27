@@ -18,6 +18,7 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="10.0.0" />
+    <ProjectReference Include="..\SharpOMatic.Engine\SharpOMatic.Engine.csproj" />
   </ItemGroup>
 
   <Target Name="PrepareEditorAssets" BeforeTargets="_CalculateEmbeddedFilesManifestInputs" Condition="'$(DesignTimeBuild)' != 'true'">
