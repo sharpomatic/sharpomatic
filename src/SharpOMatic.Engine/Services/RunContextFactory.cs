@@ -18,6 +18,7 @@ public class RunContextFactory(IServiceScopeFactory scopeFactory) : IRunContextF
         var notifications = scope.ServiceProvider.GetRequiredService<INotification>();
         var toolMethodRegistry = scope.ServiceProvider.GetRequiredService<IToolMethodRegistry>();
         var schemaTypeService = scope.ServiceProvider.GetRequiredService<ISchemaTypeService>();
+        var scriptOptionsService = scope.ServiceProvider.GetRequiredService<IScriptOptionsService>();
 
         return new RunContext(
             scope,
@@ -25,6 +26,7 @@ public class RunContextFactory(IServiceScopeFactory scopeFactory) : IRunContextF
             notifications,
             toolMethodRegistry,
             schemaTypeService,
+            scriptOptionsService,
             jsonConverters,
             workflow,
             run,

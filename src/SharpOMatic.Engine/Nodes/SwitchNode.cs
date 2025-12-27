@@ -1,7 +1,8 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
 [RunNode(NodeType.Switch)]
-public class SwitchNode(ThreadContext threadContext, SwitchNodeEntity node) : RunNode<SwitchNodeEntity>(threadContext, node)
+public class SwitchNode(ThreadContext threadContext, SwitchNodeEntity node)
+    : RunNode<SwitchNodeEntity>(threadContext, node)
 {
     protected override async Task<(string, List<NextNodeData>)> RunInternal()
     {
@@ -14,9 +15,7 @@ public class SwitchNode(ThreadContext threadContext, SwitchNodeEntity node) : Ru
 
             if (!string.IsNullOrWhiteSpace(switcher.Code))
             {
-                var options = ScriptOptions.Default
-                                    .WithImports("System", "System.Threading.Tasks", "SharpOMatic.Engine.Contexts")
-                                    .WithReferences(typeof(Task).Assembly, typeof(ContextObject).Assembly);
+                var options = ScriptOptionsService.GetScriptOptions();
 
                 try
                 {

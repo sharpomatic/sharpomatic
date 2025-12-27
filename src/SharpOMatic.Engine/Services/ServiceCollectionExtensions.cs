@@ -20,9 +20,10 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<NodeExecutionService>();
 
         // Add empty versions of optional services
-        services.TryAddSingleton<IJsonConverterService>(_ => new JsonConverterService([]));
         services.TryAddSingleton<ISchemaTypeService>(_ => new SchemaTypeService([]));
         services.TryAddSingleton<IToolMethodRegistry>(_ => new ToolMethodRegistry([]));
+        services.TryAddSingleton<IScriptOptionsService>(_ => new ScriptOptionsService([], []));
+        services.TryAddSingleton<IJsonConverterService>(_ => new JsonConverterService([]));
 
         return new SharpOMaticBuilder(services);
     }
@@ -77,6 +78,24 @@ public static class SharpOMaticBuilderExtensions
 
     public static SharpOMaticBuilder AddToolMethods(this SharpOMaticBuilder builder, params Delegate[] methods)
         => builder.AddToolMethods((IEnumerable<Delegate>)methods);
+
+    public static SharpOMaticBuilder AddScriptOptions(this SharpOMaticBuilder builder, IEnumerable<Assembly> assemblies, IEnumerable<string> imports)
+    {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(assemblies);
+        ArgumentNullException.ThrowIfNull(imports);
+
+        var assemblyList = assemblies.ToArray();
+        var importList = imports.ToArray();
+
+        builder.Services.RemoveAll<IScriptOptionsService>();
+        builder.Services.AddSingleton<IScriptOptionsService>(_ => new ScriptOptionsService(assemblyList, importList));
+
+        return builder;
+    }
+
+    public static SharpOMaticBuilder AddScriptOptions(this SharpOMaticBuilder builder, Assembly[] assemblies, string[] imports)
+        => builder.AddScriptOptions((IEnumerable<Assembly>)assemblies, (IEnumerable<string>)imports);
 
     public static SharpOMaticBuilder AddRepository(
         this SharpOMaticBuilder builder,

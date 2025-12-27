@@ -15,6 +15,7 @@ builder.Services.AddSingleton<IClockService, ClockService>();
 builder.Services.AddSharpOMatic()
     .AddSchemaTypes(typeof(TriviaResponse), typeof(StringList))
     .AddToolMethods(Tools.GetGreeting, Tools.GetTime)
+    .AddScriptOptions([typeof(ServerHelper).Assembly], ["SharpOMatic.Server"])
     .AddRepository((optionBuilder) =>
     {
         var folder = Environment.SpecialFolder.LocalApplicationData;

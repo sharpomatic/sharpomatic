@@ -3,7 +3,8 @@
 public class EngineService(INodeQueue Queue,
                            IRepository Repository,
                            IRunContextFactory RunContextFactory,
-                           IJsonConverterService? JsonConverterService = null) : IEngine
+                           IScriptOptionsService ScriptOptionsService,
+                           IJsonConverterService JsonConverterService) : IEngine
 {
     public async Task<Guid> RunWorkflow(Guid workflowId, ContextObject? nodeContext = null, ContextEntryListEntity? inputEntries = null)
     {
@@ -16,7 +17,7 @@ public class EngineService(INodeQueue Queue,
 
             foreach (var entry in inputEntries!.Entries)
             {
-                var entryValue = await ContextHelpers.ResolveContextEntryValue(nodeContext, entry);
+                var entryValue = await ContextHelpers.ResolveContextEntryValue(nodeContext, entry, ScriptOptionsService);
                 if (!nodeContext.TrySet(entry.InputPath, entryValue))
                     throw new SharpOMaticException($"Input entry '{entry.InputPath}' could not be assigned the value.");
             }
@@ -27,7 +28,7 @@ public class EngineService(INodeQueue Queue,
         if (currentNodes.Count != 1)
             throw new SharpOMaticException("Must have exactly one start node.");
 
-        var converters = JsonConverterService?.GetConverters() ?? [];
+        var converters = JsonConverterService.GetConverters();
 
         var run = new Run()
         {

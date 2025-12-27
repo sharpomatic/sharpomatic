@@ -2,7 +2,7 @@
 
 public static class ContextHelpers
 {
-    public static async Task<object?> ResolveContextEntryValue(ContextObject context, ContextEntryEntity entry)
+    public static async Task<object?> ResolveContextEntryValue(ContextObject context, ContextEntryEntity entry, IScriptOptionsService scriptOptionsService)
     {
         object? entryValue = entry.EntryValue;
 
@@ -49,13 +49,12 @@ public static class ContextHelpers
             case ContextEntryType.Expression:
                 if (!string.IsNullOrWhiteSpace(entry.EntryValue))
                 {
-                    var options = ScriptOptions.Default
-                                      .WithImports("System", "System.Threading.Tasks", "SharpOMatic.Engine.Contexts")
-                                      .WithReferences(typeof(Task).Assembly, typeof(ContextObject).Assembly);
+                    var options = scriptOptionsService.GetScriptOptions();
+                    var globals = new ScriptCodeContext() { Context = context };
 
                     try
                     {
-                        entryValue = await CSharpScript.EvaluateAsync(entry.EntryValue, options, new ScriptCodeContext() { Context = context }, typeof(ScriptCodeContext));
+                        entryValue = await CSharpScript.EvaluateAsync(entry.EntryValue, options, globals, typeof(ScriptCodeContext));
                     }
                     catch (CompilationErrorException e1)
                     {

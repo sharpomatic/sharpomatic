@@ -1,4 +1,6 @@
-﻿namespace SharpOMatic.Engine.Contexts;
+﻿using SharpOMatic.Engine.Services;
+
+namespace SharpOMatic.Engine.Contexts;
 
 public class RunContext
 {
@@ -16,6 +18,7 @@ public class RunContext
     public INotification Notifications { get; init; }
     public IToolMethodRegistry ToolMethodRegistry { get; init; }
     public ISchemaTypeService SchemaTypeService { get; init; }
+    public IScriptOptionsService ScriptOptionsService { get; init; }
     public IEnumerable<JsonConverter> JsonConverters { get; init; }
     public WorkflowEntity Workflow { get; init; }
     public Run Run { get; init; }
@@ -28,6 +31,7 @@ public class RunContext
                       INotification notifications,
                       IToolMethodRegistry toolMethodRegistry,
                       ISchemaTypeService schemaTypeService,
+                      IScriptOptionsService scriptOptionsService,
                       IEnumerable<JsonConverter> jsonConverters,
                       WorkflowEntity workflow,
                       Run run,
@@ -38,6 +42,7 @@ public class RunContext
         Notifications = notifications;
         ToolMethodRegistry = toolMethodRegistry;
         SchemaTypeService = schemaTypeService;
+        ScriptOptionsService = scriptOptionsService;
         JsonConverters = jsonConverters;
         Workflow = workflow;
         Run = run;

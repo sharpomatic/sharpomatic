@@ -1,26 +1,14 @@
-﻿namespace SharpOMatic.Engine.Services;
+namespace SharpOMatic.Engine.Services;
 
-public class CodeCheckService : ICodeCheck
+public class CodeCheckService(IScriptOptionsService ScriptOptionsService) : ICodeCheck
 {
-    private static readonly List<Assembly> s_assemblies = [];
-    private static readonly List<MetadataReference> s_metadataReference = [];
-    private static readonly List<string> s_excludeNamespace = ["Internal", "Microsoft.Win32.SafeHandles", "Microsoft.CodeAnalysis"];
-    private static readonly List<string> s_namespaces = [];
-
-    static CodeCheckService()
-    {
-        s_assemblies = [.. AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))];
-        s_metadataReference = [.. s_assemblies.Select(a => a.Location).Select(l => MetadataReference.CreateFromFile(l)).Cast<MetadataReference>()];
-        s_namespaces = GetNamespacesFromAssemblies();
-    }
-
     public Task<List<CodeCheckResult>> CodeCheck(CodeCheckRequest request)
     {
         List<CodeCheckResult> results = [];
 
         if (!string.IsNullOrWhiteSpace(request.Code))
         {
-            var options = ScriptOptions.Default.AddReferences(s_assemblies).AddImports(s_namespaces);
+            var options = ScriptOptionsService.GetScriptOptions();
 
             try
             {
@@ -46,32 +34,5 @@ public class CodeCheckService : ICodeCheck
         }
 
         return Task.FromResult(results);
-    }
-
-    private static List<string> GetNamespacesFromAssemblies()
-    {
-        var namespaces = new HashSet<string>();
-
-        foreach (var assembly in s_assemblies)
-        {
-            foreach (var type in assembly.GetExportedTypes())
-            {
-                if (!string.IsNullOrEmpty(type.Namespace))
-                {
-                    bool isExcluded = false;
-                    foreach (var excluded in s_excludeNamespace)
-                        if (type.Namespace.StartsWith(excluded))
-                        {
-                            isExcluded = true;
-                            break;
-                        }
-
-                    if (!isExcluded)
-                        namespaces.Add(type.Namespace);
-                }
-            }
-        }
-
-        return [.. namespaces];
     }
 }

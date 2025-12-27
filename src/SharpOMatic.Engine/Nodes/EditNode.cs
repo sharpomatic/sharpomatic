@@ -1,7 +1,8 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
 [RunNode(NodeType.Edit)]
-public class EditNode(ThreadContext threadContext, EditNodeEntity node) : RunNode<EditNodeEntity>(threadContext, node)
+public class EditNode(ThreadContext threadContext, EditNodeEntity node)
+    : RunNode<EditNodeEntity>(threadContext, node)
 {
     protected override async Task<(string, List<NextNodeData>)> RunInternal()
     {

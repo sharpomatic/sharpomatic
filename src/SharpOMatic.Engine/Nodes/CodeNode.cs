@@ -1,19 +1,19 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
 [RunNode(NodeType.Code)]
-public class CodeNode(ThreadContext threadContext, CodeNodeEntity node) : RunNode<CodeNodeEntity>(threadContext, node)
+public class CodeNode(ThreadContext threadContext, CodeNodeEntity node)
+    : RunNode<CodeNodeEntity>(threadContext, node)
 {
     protected override async Task<(string, List<NextNodeData>)> RunInternal()
     {
         if (!string.IsNullOrWhiteSpace(Node.Code))
         {
-            var options = ScriptOptions.Default
-                                .WithImports("System", "System.Threading.Tasks", "SharpOMatic.Engine.Contexts")
-                                .WithReferences(typeof(Task).Assembly, typeof(ContextObject).Assembly);
+            var options = ThreadContext.RunContext.ScriptOptionsService.GetScriptOptions();
+            var globals = new ScriptCodeContext() { Context = ThreadContext.NodeContext };
 
             try
             {
-                var result = await CSharpScript.RunAsync(Node.Code, options, new ScriptCodeContext() { Context = ThreadContext.NodeContext }, typeof(ScriptCodeContext));
+                var result = await CSharpScript.RunAsync(Node.Code, options, globals, typeof(ScriptCodeContext));
             }
             catch (CompilationErrorException e1)
             {

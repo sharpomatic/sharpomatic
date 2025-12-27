@@ -6,6 +6,7 @@ public abstract class RunNode<T> : IRunNode where T : NodeEntity
     protected T Node { get; init; }
     protected Trace Trace { get; init; }
     protected RunContext RunContext => ThreadContext.RunContext;
+    protected IScriptOptionsService ScriptOptionsService { get; }
 
     public RunNode(ThreadContext threadContext, NodeEntity node)
     {
@@ -76,6 +77,6 @@ public abstract class RunNode<T> : IRunNode where T : NodeEntity
 
     protected Task<object?> EvaluateContextEntryValue(ContextEntryEntity entry)
     {
-        return ContextHelpers.ResolveContextEntryValue(ThreadContext.NodeContext, entry);
+        return ContextHelpers.ResolveContextEntryValue(ThreadContext.NodeContext, entry, ScriptOptionsService);
     }
 }

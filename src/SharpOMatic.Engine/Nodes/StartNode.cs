@@ -1,7 +1,8 @@
 ﻿namespace SharpOMatic.Engine.Nodes;
 
 [RunNode(NodeType.Start)]
-public class StartNode(ThreadContext threadContext, StartNodeEntity node) : RunNode<StartNodeEntity>(threadContext, node)
+public class StartNode(ThreadContext threadContext, StartNodeEntity node)
+    : RunNode<StartNodeEntity>(threadContext, node)
 {
     protected override async Task<(string, List<NextNodeData>)> RunInternal()
     {
