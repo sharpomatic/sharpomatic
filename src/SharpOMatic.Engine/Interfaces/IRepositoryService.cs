@@ -1,6 +1,6 @@
 namespace SharpOMatic.Engine.Interfaces;
 
-public interface IRepository
+public interface IRepositoryService
 {
     // ------------------------------------------------
     // Workflow Operations

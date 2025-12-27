@@ -8,15 +8,15 @@ public static class ServiceCollectionExtensions
 
         // Add mandatory services
         services.TryAddSingleton<ICodeCheck, CodeCheckService>();
-        services.TryAddSingleton<INodeQueue, NodeQueueService>();
+        services.TryAddSingleton<INodeQueueService, NodeQueueService>();
         services.TryAddSingleton<IRunNodeFactory, RunNodeFactory>();
         services.TryAddSingleton<IRunContextFactory, RunContextFactory>();
-        services.TryAddScoped<IRepository, RepositoryService>();
-        services.TryAddScoped<IEngine, EngineService>();
+        services.TryAddScoped<IRepositoryService, RepositoryService>();
+        services.TryAddScoped<IEngineService, EngineService>();
         services.AddHostedService<NodeExecutionService>();
 
         // Add empty versions of optional services
-        services.TryAddSingleton<ISchemaTypeService>(_ => new SchemaTypeService([]));
+        services.TryAddSingleton<ISchemaTypeRegistry>(_ => new SchemaTypeRegistry([]));
         services.TryAddSingleton<IToolMethodRegistry>(_ => new ToolMethodRegistry([]));
         services.TryAddSingleton<IScriptOptionsService>(_ => new ScriptOptionsService([], []));
         services.TryAddSingleton<IJsonConverterService>(_ => new JsonConverterService([]));

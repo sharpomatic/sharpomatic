@@ -8,24 +8,20 @@ public class RunContextFactory(IServiceScopeFactory scopeFactory) : IRunContextF
         IEnumerable<JsonConverter> jsonConverters,
         int runNodeLimit)
     {
-        ArgumentNullException.ThrowIfNull(workflow);
-        ArgumentNullException.ThrowIfNull(run);
-        ArgumentNullException.ThrowIfNull(jsonConverters);
-
         var scope = scopeFactory.CreateScope();
 
-        var repository = scope.ServiceProvider.GetRequiredService<IRepository>();
-        var notifications = scope.ServiceProvider.GetRequiredService<INotification>();
+        var Servicerepository = scope.ServiceProvider.GetRequiredService<IRepositoryService>();
+        var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
         var toolMethodRegistry = scope.ServiceProvider.GetRequiredService<IToolMethodRegistry>();
-        var schemaTypeService = scope.ServiceProvider.GetRequiredService<ISchemaTypeService>();
+        var schemaTypeRegistry = scope.ServiceProvider.GetRequiredService<ISchemaTypeRegistry>();
         var scriptOptionsService = scope.ServiceProvider.GetRequiredService<IScriptOptionsService>();
 
         return new RunContext(
             scope,
-            repository,
-            notifications,
+            Servicerepository,
+            notificationService,
             toolMethodRegistry,
-            schemaTypeService,
+            schemaTypeRegistry,
             scriptOptionsService,
             jsonConverters,
             workflow,

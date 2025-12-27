@@ -2,65 +2,65 @@ namespace SharpOMatic.Editor.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class MetadataController(IRepository repository) : ControllerBase
+public class MetadataController(IRepositoryService repositoryService) : ControllerBase
 {
     [HttpGet("connector-configs")]
     public async Task<IEnumerable<ConnectorConfig>> GetConnectorConfigs()
     {
-        return await repository.GetConnectorConfigs();
+        return await repositoryService.GetConnectorConfigs();
     }
 
     [HttpGet("connectors")]
-    public Task<List<ConnectorSummary>> GetConnectorSummaries(IRepository repository)
+    public Task<List<ConnectorSummary>> GetConnectorSummaries(IRepositoryService repositoryService)
     {
-        return repository.GetConnectorSummaries();
+        return repositoryService.GetConnectorSummaries();
     }
 
     [HttpGet("connectors/{id}")]
-    public async Task<ActionResult<Connector>> GetConnector(IRepository repository, Guid id)
+    public async Task<ActionResult<Connector>> GetConnector(IRepositoryService repositoryService, Guid id)
     {
-        return await repository.GetConnector(id);
+        return await repositoryService.GetConnector(id);
     }
 
     [HttpPost("connectors")]
-    public async Task UpsertConnector(IRepository repository, [FromBody]Connector connector)
+    public async Task UpsertConnector(IRepositoryService repositoryService, [FromBody]Connector connector)
     {
-        await repository.UpsertConnector(connector);
+        await repositoryService.UpsertConnector(connector);
     }
 
     [HttpDelete("connectors/{id}")]
-    public async Task DeleteConnector(IRepository repository, Guid id)
+    public async Task DeleteConnector(IRepositoryService repositoryService, Guid id)
     {
-        await repository.DeleteConnector(id);
+        await repositoryService.DeleteConnector(id);
     }
 
     [HttpGet("model-configs")]
     public async Task<IEnumerable<ModelConfig>> GetModelConfigs()
     {
-        return await repository.GetModelConfigs();
+        return await repositoryService.GetModelConfigs();
     }
 
     [HttpGet("models")]
-    public Task<List<ModelSummary>> GetModelSummaries(IRepository repository)
+    public Task<List<ModelSummary>> GetModelSummaries(IRepositoryService repositoryService)
     {
-        return repository.GetModelSummaries();
+        return repositoryService.GetModelSummaries();
     }
 
     [HttpGet("models/{id}")]
-    public async Task<ActionResult<Model>> GetModel(IRepository repository, Guid id)
+    public async Task<ActionResult<Model>> GetModel(IRepositoryService repositoryService, Guid id)
     {
-        return await repository.GetModel(id);
+        return await repositoryService.GetModel(id);
     }
 
     [HttpPost("models")]
-    public async Task UpsertModel(IRepository repository, [FromBody] Model model)
+    public async Task UpsertModel(IRepositoryService repositoryService, [FromBody] Model model)
     {
-        await repository.UpsertModel(model);
+        await repositoryService.UpsertModel(model);
     }
 
     [HttpDelete("models/{id}")]
-    public async Task DeleteModel(IRepository repository, Guid id)
+    public async Task DeleteModel(IRepositoryService repositoryService, Guid id)
     {
-        await repository.DeleteModel(id);
+        await repositoryService.DeleteModel(id);
     }
 }

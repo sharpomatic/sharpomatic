@@ -13,7 +13,7 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
 
     protected override async Task<(string, List<NextNodeData>)> RunInternal()
     {
-        var repository = ThreadContext.RunContext.Repository;
+        var repository = ThreadContext.RunContext.RepositoryService;
 
         if (Node.ModelId is null)
             throw new SharpOMaticException("No model selected");
@@ -117,7 +117,7 @@ public class ModelCallNode(ThreadContext threadContext, ModelCallNodeEntity node
                         Node.ParameterValues.TryGetValue("structured_output_schema_name", out var schemaName);
                         Node.ParameterValues.TryGetValue("structured_output_schema_description", out var schemaDescription);
 
-                        var configuredSchema = RunContext.SchemaTypeService.GetSchema(configuredType);
+                        var configuredSchema = RunContext.SchemaTypeRegistry.GetSchema(configuredType);
                         if (string.IsNullOrWhiteSpace(configuredSchema))
                             throw new SharpOMaticException($"Configured type '{configuredType}' not found, check it is specified in the AddSchemaTypes setup.");
 

@@ -29,8 +29,8 @@ public sealed class SharpOMaticBuilder
     {
         var typeList = (types is null) ? [] : types.ToArray();
 
-        Services.RemoveAll<ISchemaTypeService>();
-        Services.AddSingleton<ISchemaTypeService>(_ => new SchemaTypeService(typeList));
+        Services.RemoveAll<ISchemaTypeRegistry>();
+        Services.AddSingleton<ISchemaTypeRegistry>(_ => new SchemaTypeRegistry(typeList));
 
         return this;
     }

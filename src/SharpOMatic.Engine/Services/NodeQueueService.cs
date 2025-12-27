@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 
 namespace SharpOMatic.Engine.Services;
 
-public class NodeQueueService : INodeQueue
+public class NodeQueueService : INodeQueueService
 {
     private readonly Channel<(ThreadContext threadContext, NodeEntity node)> _queue;
     private readonly ConcurrentDictionary<Guid, byte> _blockedRuns = new();

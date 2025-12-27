@@ -1,6 +1,6 @@
 namespace SharpOMatic.Engine.Interfaces;
 
-public interface IEngine
+public interface IEngineService
 {
     Task<Guid> RunWorkflow(Guid workflowId, ContextObject? context = null, ContextEntryListEntity? inputEntries = null);
 }

@@ -14,10 +14,10 @@ public class RunContext
     private int _runNodeLimit = 0;
 
     public IServiceScope ServiceScope { get; init; }
-    public IRepository Repository { get; init; }
-    public INotification Notifications { get; init; }
+    public IRepositoryService RepositoryService { get; init; }
+    public INotificationService NotificationService { get; init; }
     public IToolMethodRegistry ToolMethodRegistry { get; init; }
-    public ISchemaTypeService SchemaTypeService { get; init; }
+    public ISchemaTypeRegistry SchemaTypeRegistry { get; init; }
     public IScriptOptionsService ScriptOptionsService { get; init; }
     public IEnumerable<JsonConverter> JsonConverters { get; init; }
     public WorkflowEntity Workflow { get; init; }
@@ -27,10 +27,10 @@ public class RunContext
     public int RunNodeLimit => _runNodeLimit;
 
     public RunContext(IServiceScope serviceScope,
-                      IRepository repository,
-                      INotification notifications,
+                      IRepositoryService repositoryService,
+                      INotificationService notificationService,
                       IToolMethodRegistry toolMethodRegistry,
-                      ISchemaTypeService schemaTypeService,
+                      ISchemaTypeRegistry schemaTypeRegistry,
                       IScriptOptionsService scriptOptionsService,
                       IEnumerable<JsonConverter> jsonConverters,
                       WorkflowEntity workflow,
@@ -38,10 +38,10 @@ public class RunContext
                       int runNodeLimit)
     {
         ServiceScope = serviceScope;
-        Repository = repository;
-        Notifications = notifications;
+        RepositoryService = repositoryService;
+        NotificationService = notificationService;
         ToolMethodRegistry = toolMethodRegistry;
-        SchemaTypeService = schemaTypeService;
+        SchemaTypeRegistry = schemaTypeRegistry;
         ScriptOptionsService = scriptOptionsService;
         JsonConverters = jsonConverters;
         Workflow = workflow;
@@ -98,8 +98,8 @@ public class RunContext
 
     public async Task RunUpdated()
     {
-        await Repository.UpsertRun(Run);
-        await Notifications.RunProgress(Run);
+        await RepositoryService.UpsertRun(Run);
+        await NotificationService.RunProgress(Run);
     }
 
     public NodeEntity ResolveSingleOutput(NodeEntity node)

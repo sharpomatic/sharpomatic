@@ -5,14 +5,14 @@ namespace SharpOMatic.Editor.Controllers;
 public class SchemaTypeController : ControllerBase
 {
     [HttpGet]
-    public IEnumerable<string> GetSchemaTypeNames(ISchemaTypeService schematypeService)
+    public IEnumerable<string> GetSchemaTypeNames(ISchemaTypeRegistry schemaTypeRegistry)
     {
-        return schematypeService.GetTypeNames();
+        return schemaTypeRegistry.GetTypeNames();
     }
 
     [HttpGet("{typeName}")]
-    public string GetSchemaTypeNames(ISchemaTypeService schematypeService, string typeName)
+    public string GetSchemaTypeNames(ISchemaTypeRegistry schemaTypeRegistry, string typeName)
     {
-        return schematypeService.GetSchema(typeName);
+        return schemaTypeRegistry.GetSchema(typeName);
     }
 }

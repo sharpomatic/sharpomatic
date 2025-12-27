@@ -12,9 +12,9 @@ public class RunController : ControllerBase
     };
 
     [HttpGet("latestforworkflow/{id}")]
-    public async Task<Run?> GetLatestRunForWorkflow(IRepository repository, Guid id)
+    public async Task<Run?> GetLatestRunForWorkflow(IRepositoryService repositoryService, Guid id)
     {
-        var run = await repository.GetLatestRunForWorkflow(id);
+        var run = await repositoryService.GetLatestRunForWorkflow(id);
 
         if (run is not null)
             NormalizeInputEntriesForClient(run);
@@ -24,19 +24,19 @@ public class RunController : ControllerBase
 
     [HttpGet("latestforworkflow/{id}/{page}/{count}")]
     public async Task<WorkflowRunPageResult> GetLatestRunsForWorkflow(
-        IRepository repository,
+        IRepositoryService repositoryService,
         Guid id,
         int page,
         int count,
         [FromQuery] RunSortField sortBy = RunSortField.Created,
         [FromQuery] SortDirection sortDirection = SortDirection.Descending)
     {
-        var totalCount = await repository.GetWorkflowRunCount(id);
+        var totalCount = await repositoryService.GetWorkflowRunCount(id);
         if (count < 1 || page < 1 || totalCount == 0)
             return new WorkflowRunPageResult([], totalCount);
 
         var skip = (page - 1) * count;
-        var runs = await repository.GetWorkflowRuns(id, sortBy, sortDirection, skip, count);
+        var runs = await repositoryService.GetWorkflowRuns(id, sortBy, sortDirection, skip, count);
 
         foreach (var run in runs)
             NormalizeInputEntriesForClient(run);

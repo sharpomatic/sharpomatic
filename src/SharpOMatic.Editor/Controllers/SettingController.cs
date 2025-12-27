@@ -5,14 +5,14 @@ namespace SharpOMatic.Editor.Controllers;
 public class SettingController : ControllerBase
 {
     [HttpGet]
-    public async Task<List<Setting>> GetSettings(IRepository repository)
+    public async Task<List<Setting>> GetSettings(IRepositoryService repositoryService)
     {
-        return await repository.GetSettings();
+        return await repositoryService.GetSettings();
     }
 
     [HttpPost]
-    public async Task UpsertSetting(IRepository repository, [FromBody] Setting setting)
+    public async Task UpsertSetting(IRepositoryService repositoryService, [FromBody] Setting setting)
     {
-        await repository.UpsertSetting(setting);
+        await repositoryService.UpsertSetting(setting);
     }
 }

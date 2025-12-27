@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace SharpOMatic.Engine.Services;
 
-public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContextFactory) : IRepository
+public class RepositoryService(IDbContextFactory<SharpOMaticDbContext> dbContextFactory) : IRepositoryService
 {
     private const string SECRET_OBFUSCATION = "********";
 

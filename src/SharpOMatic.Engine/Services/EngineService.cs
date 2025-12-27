@@ -1,10 +1,10 @@
 ﻿namespace SharpOMatic.Engine.Services;
 
-public class EngineService(INodeQueue Queue,
-                           IRepository Repository,
+public class EngineService(INodeQueueService QueueService,
+                           IRepositoryService RepositoryService,
                            IRunContextFactory RunContextFactory,
                            IScriptOptionsService ScriptOptionsService,
-                           IJsonConverterService JsonConverterService) : IEngine
+                           IJsonConverterService JsonConverterService) : IEngineService
 {
     public async Task<Guid> RunWorkflow(Guid workflowId, ContextObject? nodeContext = null, ContextEntryListEntity? inputEntries = null)
     {
@@ -23,7 +23,7 @@ public class EngineService(INodeQueue Queue,
             }
         }
 
-        var workflow = await Repository.GetWorkflow(workflowId) ?? throw new SharpOMaticException($"Could not load workflow {workflowId}.");
+        var workflow = await RepositoryService.GetWorkflow(workflowId) ?? throw new SharpOMaticException($"Could not load workflow {workflowId}.");
         var currentNodes = workflow.Nodes.Where(n => n.NodeType == NodeType.Start).ToList();
         if (currentNodes.Count != 1)
             throw new SharpOMaticException("Must have exactly one start node.");
@@ -41,7 +41,7 @@ public class EngineService(INodeQueue Queue,
             InputContext = JsonSerializer.Serialize(nodeContext, new JsonSerializerOptions().BuildOptions(converters))
         };
 
-        var nodeRunLimitSetting = await Repository.GetSetting("RunNodeLimit");
+        var nodeRunLimitSetting = await RepositoryService.GetSetting("RunNodeLimit");
         var nodeRunLimit = nodeRunLimitSetting?.ValueInteger ?? NodeExecutionService.DEFAULT_NODE_RUN_LIMIT;
 
         var runContext = RunContextFactory.Create(workflow, run, converters, nodeRunLimit);
@@ -49,7 +49,7 @@ public class EngineService(INodeQueue Queue,
 
         await runContext.RunUpdated();
 
-        Queue.Enqueue(threadContext, currentNodes[0]);
+        QueueService.Enqueue(threadContext, currentNodes[0]);
         return run.RunId;
     }
 }

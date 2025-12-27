@@ -15,9 +15,6 @@ public class RunNodeFactory : IRunNodeFactory
 
     public IRunNode Create(ThreadContext threadContext, NodeEntity node)
     {
-        ArgumentNullException.ThrowIfNull(threadContext);
-        ArgumentNullException.ThrowIfNull(node);
-
         if (!_nodeRunners.TryGetValue(node.NodeType, out var runnerType))
             throw new SharpOMaticException($"Unrecognized node type '{node.NodeType}'");
 

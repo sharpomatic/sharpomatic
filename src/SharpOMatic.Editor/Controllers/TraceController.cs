@@ -5,7 +5,7 @@ namespace SharpOMatic.Editor.Controllers;
 public class TraceController : ControllerBase
 {
     [HttpGet("forrun/{id}")]
-    public async Task<IEnumerable<Trace>> GetRunTraces(IRepository repository, Guid id)
+    public async Task<IEnumerable<Trace>> GetRunTraces(IRepositoryService repository, Guid id)
     {
         return await repository.GetRunTraces(id);
     }

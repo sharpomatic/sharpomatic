@@ -1,6 +1,6 @@
 namespace SharpOMatic.Engine.Services;
 
-public class SchemaTypeService(IEnumerable<Type> types) : ISchemaTypeService
+public class SchemaTypeRegistry(IEnumerable<Type> types) : ISchemaTypeRegistry
 {
     private readonly Dictionary<string, Type> _types = types.ToDictionary(t => t.Name, t => t);
 

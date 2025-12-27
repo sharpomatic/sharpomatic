@@ -11,19 +11,19 @@ public class WorkflowController : ControllerBase
     };
 
     [HttpGet]
-    public Task<List<WorkflowEditSummary>> GetWorkflowEditSummaries(IRepository repository)
+    public Task<List<WorkflowEditSummary>> GetWorkflowEditSummaries(IRepositoryService repository)
     {
         return repository.GetWorkflowEditSummaries();
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<WorkflowEntity>> GetWorkflow(IRepository repository, Guid id)
+    public async Task<ActionResult<WorkflowEntity>> GetWorkflow(IRepositoryService repository, Guid id)
     {
         return await repository.GetWorkflow(id);
     }
 
     [HttpPost()]
-    public async Task UpsertWorkflow(IRepository repository)
+    public async Task UpsertWorkflow(IRepositoryService repository)
     {
         string requestBody;
         using var reader = new StreamReader(Request.Body);
@@ -33,19 +33,19 @@ public class WorkflowController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task DeleteWorkflow(IRepository repository, Guid id)
+    public async Task DeleteWorkflow(IRepositoryService repository, Guid id)
     {
         await repository.DeleteWorkflow(id);
     }
 
 
     [HttpPost("run/{id}")]
-    public async Task<ActionResult<Guid>> Run(IEngine engine, Guid id)
+    public async Task<ActionResult<Guid>> Run(IEngineService engineService, Guid id)
     {
         // Parse the incoming ContextEntryListEntity data
         using var reader = new StreamReader(Request.Body);
         var contextEntryListEntity = JsonSerializer.Deserialize<ContextEntryListEntity>(await reader.ReadToEndAsync(), _options);
 
-        return await engine.RunWorkflow(id, inputEntries: contextEntryListEntity);
+        return await engineService.RunWorkflow(id, inputEntries: contextEntryListEntity);
     }
 }

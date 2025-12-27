@@ -1,6 +1,6 @@
 namespace SharpOMatic.Engine.Services;
 
-public class NodeExecutionService(INodeQueue queue, 
+public class NodeExecutionService(INodeQueueService queue, 
                                   IServiceScopeFactory scopeFactory, 
                                   IRunNodeFactory runNodeFactory) : BackgroundService
 {
@@ -118,13 +118,13 @@ public class NodeExecutionService(INodeQueue queue,
     {
         try
         {
-            var runHistoryLimitSetting = await runContext.Repository.GetSetting("RunHistoryLimit");
+            var runHistoryLimitSetting = await runContext.RepositoryService.GetSetting("RunHistoryLimit");
 
             var runHistoryLimit = runHistoryLimitSetting?.ValueInteger ?? DEFAULT_RUN_HISTORY_LIMIT;
             if (runHistoryLimit < 0)
                 runHistoryLimit = 0;
 
-            await runContext.Repository.PruneWorkflowRuns(runContext.Run.WorkflowId, runHistoryLimit);
+            await runContext.RepositoryService.PruneWorkflowRuns(runContext.Run.WorkflowId, runHistoryLimit);
         }
         catch (Exception ex)
         {
@@ -148,7 +148,7 @@ public class NodeExecutionService(INodeQueue queue,
     private async Task CheckSettings()
     {
         using var scope = scopeFactory.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<IRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<IRepositoryService>();
         var versionSetting = await repository.GetSetting("Version");
 
         if (versionSetting is null)
@@ -191,10 +191,10 @@ public class NodeExecutionService(INodeQueue queue,
         await LoadMetadata<ModelConfig>("Metadata.Resources.ModelConfig", (repo, config) => repo.UpsertModelConfig(config));
     }
 
-    private async Task LoadMetadata<T>(string resourceFilter, Func<IRepository, T, Task> upsertAction)
+    private async Task LoadMetadata<T>(string resourceFilter, Func<IRepositoryService, T, Task> upsertAction)
     {
         using var scope = scopeFactory.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<IRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<IRepositoryService>();
         var assembly = Assembly.GetExecutingAssembly();
         var resourceNames = assembly.GetManifestResourceNames().Where(name => name.Contains(resourceFilter) && name.EndsWith(".json"));
 
